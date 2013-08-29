@@ -1,0 +1,13 @@
+videosort-2.0:
+  - new options "TvCategories", "OtherTvDir" and "OtherTvFormat" for TV shows, whose file names look like movies (neither series nor dated shows);
+  - new format specifiers "%y", "%decade", "%0decade" for seasoned TV shows;
+  - added support for multi episode file names (example: My.Show.S01E02-03.mkv);
+  - new option "EpisodeSeparator" to adjust formatting of multi episode file names;
+  - added support for DNZB-Header "X-DNZB-UseNZBName";
+  - added printing info-message when skipping small files;
+  - added using of command "[NZB] FINALDIR" to inform NZBGet about new files location; this path is then shown in the history dialog as "Destination";
+  - destination directories (options "MoviesDir", etc.) can be left empty to use global "DestDir" or "CategoryX.DestDir"  as destination;
+  - updated guessit-library to the newest release - this fixes several issues.
+
+videosort-1.0:
+  - initial release.

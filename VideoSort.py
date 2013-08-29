@@ -36,21 +36,47 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.sourceforge.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 1.0.
+# PP-Script Version: 2.0.
 #
-# NOTE: This script requires Python to be installed on your system.
+# NOTE: This script requires Python 2.x to be installed on your system.
 
 ##############################################################################
 ### OPTIONS																   ###
 
 # Destination directory for movies.
+#
+# The option can be left empty to use global DestDir or CategoryX.DestDir
+# as destination.
 #MoviesDir=${DestDir}/movies
 
 # Destination directory for seasoned TV shows.
+#
+# The option can be left empty to use global DestDir or CategoryX.DestDir
+# as destination.
 #SeriesDir=${DestDir}/series
 
 # Destination directory for dated TV shows.
+#
+# The option can be left empty to use global DestDir or CategoryX.DestDir
+# as destination.
 #DatedDir=${DestDir}/tv
+
+# Destination directory for other TV shows.
+#
+# The option can be left empty to use global DestDir or CategoryX.DestDir
+# as destination.
+#OtherTvDir=${DestDir}/tv
+
+# List of TV categories.
+#
+# Comma separated list of categories for TV. VideoSort automatically
+# distinguishes movies from series and dated TV shows. But it needs help
+# to distinguish movies from other TV shows because they are named
+# using same conventions. If a download has associated category listed in
+# option <TvCategories>, VideoSort uses this information.
+#
+# Category names must match categories defined in NZBGet.
+#TvCategories=tv
 
 # File extensions for video files.
 #
@@ -93,7 +119,7 @@
 # %qah            - audio channels (5.1);
 # %qrg            - release group;
 # {{text}}        - uppercase the text;
-# {TEXT}          - lowercase the text;
+# {TEXT}          - lowercase the text.
 #MoviesFormat=%t (%y)
 
 # Formatting rules for seasoned TV shows.
@@ -108,9 +134,22 @@
 # %0e             - two-digits episode number (01, 02);
 # %en, %e.n, %e_n - episode name (case-adjusted);
 # %eN, %e.N, %e_N - episode name (original letter case);
+# %y			  - year;
+# %decade         - two-digits decade (90, 00, 10);
+# %0decade        - four-digits decade (1990, 2000, 2010).
 #
 # For a list of common specifiers see option <MoviesFormat>.
 #SeriesFormat=%sn/Season %s/%sn - S%0sE%0e - %en
+
+# Separator for multi episodes.
+#
+# The option is used for seasoned TV shows when video file includes
+# multiple episodes, e. g. "My.Show.S01E02-03.mkv". The option defines
+# a character (or a string) which must be insterted between episode
+# numbers. For example, if "EpisodeSeparator=E", the specifier "%0e"
+# will expand to "02E03". Giving formatting string "%sN - S%0sE%0e" the
+# resulting filename will be "My Show - S01E02E03.mkv".
+#EpisodeSeparator=E
 
 # Formatting rules for dated TV shows.
 #
@@ -124,10 +163,15 @@
 # %m			  - month (1-12);
 # %0m			  - two-digits month (01-12);
 # %d			  - day (1-31);
-# %0d			  - two-digits day (01-31);
+# %0d			  - two-digits day (01-31).
 #
 # For a list of common specifiers see option <MoviesFormat>.
 #DatedFormat=%sn/%sn - %y-%0m-%0d
+
+# Formatting rules for other TV shows.
+#
+# All specifiers are same as in option <MoviesFormat>.
+#OtherTvFormat=%t
 
 # List of words to keep in lower case.
 #
@@ -192,7 +236,7 @@ if not 'NZBOP_SCRIPTDIR' in os.environ:
 
 # Check if directory still exist (for post-process again)
 if not os.path.exists(os.environ['NZBPP_DIRECTORY']):
-	print('[INFO] Destination directory doesn\'t exist, exiting')
+	print('[INFO] Destination directory %s doesn\'t exist, exiting' % os.environ['NZBPP_DIRECTORY'])
 	sys.exit(POSTPROCESS_NONE)
 
 # Check par and unpack status for errors
@@ -201,23 +245,27 @@ if os.environ['NZBPP_PARSTATUS'] == '1' or os.environ['NZBPP_PARSTATUS'] == '4' 
 	sys.exit(POSTPROCESS_NONE)
 
 # Check if all required script config options are present in config file
-required_options = ('NZBPO_MOVIESDIR', 'NZBPO_SERIESDIR', 'NZBPO_DATEDDIR', 'NZBPO_VIDEOEXTENSIONS',
-	'NZBPO_SATELLITEEXTENSIONS', 'NZBPO_MINSIZE', 'NZBPO_MOVIESFORMAT', 'NZBPO_SERIESFORMAT',
-	'NZBPO_DATEDFORMAT', 'NZBPO_OVERWRITE', 'NZBPO_CLEANUP', 'NZBPO_LOWERWORDS', 'NZBPO_UPPERWORDS',
-	'NZBPO_PREVIEW', 'NZBPO_VERBOSE')
+required_options = ('NZBPO_MoviesDir', 'NZBPO_SeriesDir', 'NZBPO_DatedDir',
+	'NZBPO_OtherTvDir', 'NZBPO_VideoExtensions', 'NZBPO_SatelliteExtensions', 'NZBPO_MinSize',
+	'NZBPO_MoviesFormat', 'NZBPO_SeriesFormat', 'NZBPO_OtherTvFormat', 'NZBPO_DatedFormat',
+	'NZBPO_EpisodeSeparator', 'NZBPO_Overwrite', 'NZBPO_Cleanup', 'NZBPO_LowerWords', 'NZBPO_UpperWords',
+	'NZBPO_TvCategories', 'NZBPO_Preview', 'NZBPO_Verbose')
 for optname in required_options:
-	if (not optname in os.environ):
+	if (not optname.upper() in os.environ):
 		print('[ERROR] Option %s is missing in configuration file. Please check script settings' % optname[6:])
 		sys.exit(POSTPROCESS_ERROR)
 
 # Init script config options
 download_dir=os.environ['NZBPP_DIRECTORY']
+movies_format=os.environ['NZBPO_MOVIESFORMAT']
 series_format=os.environ['NZBPO_SERIESFORMAT']
 dated_format=os.environ['NZBPO_DATEDFORMAT']
-movies_format=os.environ['NZBPO_MOVIESFORMAT']
+othertv_format=os.environ['NZBPO_OTHERTVFORMAT']
+episode_separator=os.environ['NZBPO_EPISODESEPARATOR']
 movies_dir=os.environ['NZBPO_MOVIESDIR']
 series_dir=os.environ['NZBPO_SERIESDIR']
 dated_dir=os.environ['NZBPO_DATEDDIR']
+othertv_dir=os.environ['NZBPO_OTHERTVDIR']
 video_extensions=os.environ['NZBPO_VIDEOEXTENSIONS'].split(',')
 satellite_extensions=os.environ['NZBPO_SATELLITEEXTENSIONS'].split(',')
 min_size=int(os.environ['NZBPO_MINSIZE'])
@@ -230,8 +278,20 @@ satellites=len(satellite_extensions)>0
 lower_words=os.environ['NZBPO_LOWERWORDS'].replace(' ', '').split(',')
 upper_words=os.environ['NZBPO_UPPERWORDS'].replace(' ', '').split(',')
 
+tv_categories=os.environ['NZBPO_TVCATEGORIES'].lower().split(',')
+category=os.environ.get('NZBPP_CATEGORY', '');
+force_tv=category.lower() in tv_categories
+
+force_nzbname=os.environ.get('NZBPR__DNZB_USENZBNAME', '').lower() == 'yes'
+
 if preview:
 	print('[WARNING] *** PREVIEW MODE ON - NO CHANGES TO FILE SYSTEM ***')
+
+if verbose and force_nzbname:
+	print('[INFO] Forcing use of nzb-name (X-DNZB-UseNZBName)')
+
+if verbose and force_tv:
+	print('[INFO] Forcing TV sorting (category: %s)' % category)
 
 # List of moved files (source path)
 moved_src_files = []
@@ -518,16 +578,6 @@ except:
 
 # END * From SABnzbd+ * END
 
-def guess_hacks(filename, guess):
-	""" fix some strange guessit guessing:
-		if guessit doesn't find a year in the file name it thinks it is episode,
-		but we prefer it to be handled as movie instead
-	"""
-	if guess.get('type') == 'episode' and not guess.get('episodeNumber'):
-		guess['type'] = 'movie'
-		guess['title'] = guess.get('series')
-		guess['year'] = '1900'
-
 def add_common_mapping(old_filename, guess, mapping):
 
 	# Original dir name, file name and extension
@@ -585,9 +635,31 @@ def add_series_mapping(guess, mapping):
 		mapping.append(('%e_N', ''))
 
 	# episode number
-	episode_num = str(guess.get('episodeNumber', ''))
-	mapping.append(('%e', episode_num))
-	mapping.append(('%0e', episode_num.rjust(2,'0')))
+	if guess.get('episodeList') == None:
+		episode_num = str(guess.get('episodeNumber', ''))
+		mapping.append(('%e', episode_num))
+		mapping.append(('%0e', episode_num.rjust(2,'0')))
+	else:
+		# multi episodes
+		episode_num_all = ''
+		episode_num_just = ''
+		for episode_num in guess.get('episodeList'):
+			ep_prefix = episode_separator if episode_num_all <> '' else ''
+			episode_num_all += ep_prefix + str(episode_num)
+			episode_num_just += ep_prefix + str(episode_num).rjust(2,'0')
+
+		mapping.append(('%e', episode_num_all))
+		mapping.append(('%0e', episode_num_just))
+
+	# year
+	year = str(guess.get('year', ''))
+	mapping.append(('%y', year))
+
+	# decades
+	decade, decade_two = get_decades(year)
+	mapping.append(('%decade', decade))
+	mapping.append(('%0decade', decade_two))
+	
 
 def add_movies_mapping(guess, mapping):
 
@@ -672,44 +744,80 @@ def add_dated_mapping(guess, mapping):
 	mapping.append(('%d', day))
 	mapping.append(('%0d', day.rjust(2, '0')))
 
+def guess_info(filename):
+	""" Parses the filename using guessit-library """
+
+	if force_nzbname:
+		guessfilename = os.path.join(os.path.dirname(filename), os.path.basename(download_dir)) + os.path.splitext(filename)[1]
+	else:
+		guessfilename = filename
+
+	guess = guessit.guess_file_info(guessfilename, filetype = 'autodetect', info = ['filename'])
+	
+	if verbose:
+		print('Guessing: %s' % guessfilename)
+		print(guess.nice_string())
+
+	# fix some strange guessit guessing:
+	# if guessit doesn't find a year in the file name it thinks it is episode,
+	# but we prefer it to be handled as movie instead
+	if guess.get('type') == 'episode' and guess.get('episodeNumber', '') == '':
+		guess['type'] = 'movie'
+		guess['title'] = guess.get('series')
+		guess['year'] = '1900'
+		if verbose:
+			print(guess.nice_string())
+
+	if guess['type'] == 'movie':
+		date = guess.get('date')
+		if date:
+			guess['vtype'] = 'dated'
+		elif force_tv:
+			guess['vtype'] = 'othertv'
+		else:
+			guess['vtype'] = 'movie'
+	elif guess['type'] == 'episode':
+		guess['vtype'] = 'series'
+
+	if verbose:
+		print('Type: %s' % guess['vtype'])
+	
+	return guess
+
 def construct_path(filename):
 	""" Parses the filename and generates new name for renaming """
 
 	if verbose:
 		print("filename: %s" % filename)
 
-	guess = guessit.guess_file_info(filename, filetype = 'autodetect', info = ['filename'])
-	
-	if verbose:
-		print(guess.nice_string())
-
-	type = guess.get('type')
-
+	guess = guess_info(filename);
+	type = guess.get('vtype')
 	mapping = []
-	
-	# fix some strange guessit guessing:
-	guess_hacks(filename, guess)
-
 	add_common_mapping(filename, guess, mapping)
 
 	if type == 'movie':
-		date = guess.get('date')
-		if date:
-			dest_dir = dated_dir
-			format = dated_format
-			add_dated_mapping(guess, mapping)
-		else:
-			dest_dir = movies_dir
-			format = movies_format
-			add_movies_mapping(guess, mapping)
-	elif type == 'episode':
+		dest_dir = movies_dir
+		format = movies_format
+		add_movies_mapping(guess, mapping)
+	elif type == 'series':
 		dest_dir = series_dir
 		format = series_format
 		add_series_mapping(guess, mapping)
+	elif type == 'dated':
+		dest_dir = dated_dir
+		format = dated_format
+		add_dated_mapping(guess, mapping)
+	elif type == 'othertv':
+		dest_dir = othertv_dir
+		format = othertv_format
+		add_movies_mapping(guess, mapping)
 	else:
 		if verbose:
 			print('Could not determine video type for %s' % filename)
 		return None
+
+	if dest_dir == '':
+		dest_dir = os.path.dirname(download_dir)
 
 	# Find out a char most suitable as dupe_separator
 	guess_dupe_separator(format)
@@ -776,7 +884,9 @@ for root, dirs, files in os.walk(download_dir):
 			if ext not in video_extensions: continue
 			
 			# Check minimum file size			 
-			if os.path.getsize(old_path) < min_size: continue
+			if os.path.getsize(old_path) < min_size:
+				print('[INFO] Skipping small: %s' % old_filename)
+				continue
 			
 			# This is our video file, we should process it
 			new_path = construct_path(old_path)
@@ -794,8 +904,20 @@ for root, dirs, files in os.walk(download_dir):
 			errors = True
 			print('[ERROR] Failed: %s' % old_filename)
 			print('[ERROR] %s' % e)
-			if verbose:
-				traceback.print_exc()
+			traceback.print_exc()
+
+# Inform NZBGet about new destination path
+finaldir = ''
+uniquedirs = []
+for filename in moved_dst_files:
+	dir = os.path.dirname(filename)
+	if dir not in uniquedirs:
+		uniquedirs.append(dir)
+		finaldir += '|' if finaldir != '' else ''
+		finaldir += dir
+
+if finaldir != '':
+	print('[NZB] FINALDIR=%s' % finaldir)
 
 # Cleanup if:
 # 1) files were moved AND

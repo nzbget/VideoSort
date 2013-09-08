@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.sourceforge.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 2.0.
+# PP-Script Version: 3.0.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -150,6 +150,14 @@
 # will expand to "02E03". Giving formatting string "%sN - S%0sE%0e" the
 # resulting filename will be "My Show - S01E02E03.mkv".
 #EpisodeSeparator=E
+
+# Treat year following title as part of title (yes, no).
+#
+# For seasoned TV shows: if year in the file name goes directly after
+# show name, it will be added to show name. This may be necessary for
+# media players like XBMC, Boxee or Plex (or anyone using TheTVDB) to
+# properly index TV show.
+#SeriesYear=yes
 
 # Formatting rules for dated TV shows.
 #
@@ -277,6 +285,7 @@ verbose=os.environ['NZBPO_VERBOSE'] == 'yes'
 satellites=len(satellite_extensions)>0
 lower_words=os.environ['NZBPO_LOWERWORDS'].replace(' ', '').split(',')
 upper_words=os.environ['NZBPO_UPPERWORDS'].replace(' ', '').split(',')
+series_year=os.environ.get('NZBPO_SERIESYEAR', 'yes') == 'yes'
 
 tv_categories=os.environ['NZBPO_TVCATEGORIES'].lower().split(',')
 category=os.environ.get('NZBPP_CATEGORY', '');
@@ -747,15 +756,31 @@ def add_dated_mapping(guess, mapping):
 def guess_info(filename):
 	""" Parses the filename using guessit-library """
 
-	if force_nzbname:
+	use_nzbname = force_nzbname
+	
+	if not use_nzbname:
+		fn = os.path.splitext(os.path.basename(filename))[0]
+		if fn.find('.')==-1 and fn.find('_')==-1 and fn.find(' ')==-1:
+			print("Detected obfuscated filename %s, using NZB-Name instead" % os.path.basename(filename))
+			use_nzbname = True
+
+	if use_nzbname:
 		guessfilename = os.path.join(os.path.dirname(filename), os.path.basename(download_dir)) + os.path.splitext(filename)[1]
 	else:
 		guessfilename = filename
 
-	guess = guessit.guess_file_info(guessfilename, filetype = 'autodetect', info = ['filename'])
-	
 	if verbose:
 		print('Guessing: %s' % guessfilename)
+
+	matcher = guessit.matcher.IterativeMatcher(unicode(guessfilename), filetype='autodetect', opts=['nolanguage', 'nocountry'])
+	mtree = matcher.match_tree
+	guess = matcher.matched()
+
+	if verbose:
+		print(mtree)
+		for node in mtree.nodes():
+			if node.guess:
+				print(node.guess)
 		print(guess.nice_string())
 
 	# fix some strange guessit guessing:
@@ -766,7 +791,21 @@ def guess_info(filename):
 		guess['title'] = guess.get('series')
 		guess['year'] = '1900'
 		if verbose:
+			print('episode without episodeNumber is a movie')
 			print(guess.nice_string())
+
+	# detect if year is part of series name
+	if guess['type'] == 'episode' and series_year:
+		last_node = None
+		for node in mtree.nodes():
+			if node.guess:
+				if last_node != None and node.guess.get('year') != None and last_node.guess.get('series') != None:
+					guess['series'] += ' ' + str(guess['year'])
+					if verbose:
+						print('year is part of title')
+						print(guess.nice_string())
+					break
+				last_node = node
 
 	if guess['type'] == 'movie':
 		date = guess.get('date')

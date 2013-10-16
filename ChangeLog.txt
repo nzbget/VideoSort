@@ -1,10 +1,20 @@
+videosort-4.0:
+  - improved detection of obfuscated file and directory names;
+  - added support for DNZB-Headers "X-DNZB-ProperName", "X-DNZB-EpisodeName",
+    "X-DNZB-MovieYear";
+  - removed support for DNZB-Header "X-DNZB-UseNZBName";
+  - new option "DNZBHeaders" to disable using of DNZB-Headers if necessary;
+  - new format specifier "%imdb" and "%cpimdb" (thanks Chris Hamilton for the patch);
+  - removing invalid characters from generated file name;
+  - updated guessit-library to the newest release - this fixes several issues.
+
 videosort-3.0:
- - added for seasoned TV shows: if year in the file name goes directly after
-   show name, it will be added to show name. This may be necessary for
-   media players like XBMC, Boxee or Plex (or anyone using TheTVDB) to
-   properly index TV show. New option option "SeriesYear";
- - added detection of obfuscated file names; if such file name is detected
-   a nzb-name is used instead.
+  - added for seasoned TV shows: if year in the file name goes directly after
+    show name, it will be added to show name. This may be necessary for
+    media players like XBMC, Boxee or Plex (or anyone using TheTVDB) to
+    properly index TV show. New option option "SeriesYear";
+  - added detection of obfuscated file names; if such file name is detected
+    a nzb-name is used instead.
   
 videosort-2.0:
   - new options "TvCategories", "OtherTvDir" and "OtherTvFormat" for TV shows, whose file names look like movies (neither series nor dated shows);

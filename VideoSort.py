@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.sourceforge.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 3.0.
+# PP-Script Version: 4.0.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -106,6 +106,8 @@
 # %y			  - year;
 # %decade         - two-digits decade (90, 00, 10);
 # %0decade        - four-digits decade (1990, 2000, 2010).
+# %imdb           - IMDb ID;
+# %cpimdb         - IMDb ID (formatted for CouchPotato);
 #
 # Common specifiers (for movies, series and dated tv shows):
 # %dn             - original directory name (nzb-name);
@@ -191,6 +193,13 @@
 # This option has effect on "case-adjusted"-specifiers.
 #UpperWords=III,II,IV
 
+# Use information from Direct-NZB headers (yes, no).
+#
+# NZB-sites may provide extended information about videos,
+# which is usually more confident than the information extracted
+# from file names.
+#DNZBHeaders=yes
+
 # Overwrite files at destination (yes, no).
 #
 # If not active the files are still moved into destination but
@@ -224,7 +233,6 @@ from os.path import dirname
 sys.path.append(dirname(__file__) + '/lib')
 
 import os
-import string
 import traceback
 import re
 import shutil
@@ -288,16 +296,17 @@ upper_words=os.environ['NZBPO_UPPERWORDS'].replace(' ', '').split(',')
 series_year=os.environ.get('NZBPO_SERIESYEAR', 'yes') == 'yes'
 
 tv_categories=os.environ['NZBPO_TVCATEGORIES'].lower().split(',')
-category=os.environ.get('NZBPP_CATEGORY', '');
+category=os.environ.get('NZBPP_CATEGORY', '')
 force_tv=category.lower() in tv_categories
 
-force_nzbname=os.environ.get('NZBPR__DNZB_USENZBNAME', '').lower() == 'yes'
+dnzb_headers=os.environ.get('NZBPO_DNZBHEADERS', 'yes') == 'yes'
+dnzb_proper_name=os.environ.get('NZBPR__DNZB_PROPERNAME', '')
+dnzb_episode_name=os.environ.get('NZBPR__DNZB_EPISODENAME', '')
+dnzb_movie_year=os.environ.get('NZBPR__DNZB_MOVIEYEAR', '')
+dnzb_more_info=os.environ.get('NZBPR__DNZB_MOREINFO', '')
 
 if preview:
 	print('[WARNING] *** PREVIEW MODE ON - NO CHANGES TO FILE SYSTEM ***')
-
-if verbose and force_nzbname:
-	print('[INFO] Forcing use of nzb-name (X-DNZB-UseNZBName)')
 
 if verbose and force_tv:
 	print('[INFO] Forcing TV sorting (category: %s)' % category)
@@ -425,7 +434,7 @@ REPLACE_AFTER = {
 	'  ': ' ',
 	'//': '/',
 	' - - ': ' - ',
-	'__': '_'
+	'--': '-'
 }
 
 def path_subst(path, mapping):
@@ -458,9 +467,9 @@ def get_titles(name, titleing=False):
 	a lot of little hacks to make it better and for more control
 	'''
 
-	title = name.replace('.', ' ').replace('_', ' ')
-	title = title.strip().strip('(').strip('_').strip('-').strip().strip('_')
-
+	#make valid filename
+	title = re.sub('[\"\:\?\*\\\/\<\>\|]', ' ', name)
+ 
 	if titleing:
 		title = titler(title) # title the show name so it is in a consistant letter case
 
@@ -702,6 +711,10 @@ def add_movies_mapping(guess, mapping):
 	mapping.append(('%decade', decade))
 	mapping.append(('%0decade', decade_two))
 
+	# imdb
+	mapping.append(('%imdb', guess.get('imdb', '')))
+	mapping.append(('%cpimdb', guess.get('cpimdb', '')))
+
 def add_dated_mapping(guess, mapping):
 
 	# title
@@ -753,22 +766,110 @@ def add_dated_mapping(guess, mapping):
 	mapping.append(('%d', day))
 	mapping.append(('%0d', day.rjust(2, '0')))
 
+def os_path_split(path):
+    parts = []
+    while True:
+        newpath, tail = os.path.split(path)
+        if newpath == path:
+            if path: parts.append(path)
+            break
+        parts.append(tail)
+        path = newpath
+    parts.reverse()
+    return parts
+    
+def deobfuscate_path(filename):
+	start = os.path.dirname(download_dir)
+	new_name = filename[len(start)+1:]
+	if verbose:
+		print('stripped filename: %s' % new_name)
+
+	parts = os_path_split(new_name)
+	if verbose:
+		print(parts)
+	
+	part_removed = 0
+	for x in range(0, len(parts)-1):
+		fn = parts[x]
+		if fn.find('.')==-1 and fn.find('_')==-1 and fn.find(' ')==-1:
+			print('Detected obfuscated directory name %s, removing from guess path' % fn)
+			parts[x] = None
+			part_removed += 1
+			
+	fn = os.path.splitext(parts[len(parts)-1])[0]
+	if fn.find('.')==-1 and fn.find('_')==-1 and fn.find(' ')==-1:
+		print('Detected obfuscated filename %s, removing from guess path' % os.path.basename(filename))
+		parts[len(parts)-1] = '-' + os.path.splitext(filename)[1]
+		part_removed += 1
+
+	if part_removed < len(parts):
+		new_name = ''
+		for x in range(0, len(parts)):
+			if parts[x] != None:
+				new_name = os.path.join(new_name, parts[x])
+	else:
+		print("All file path parts are obfuscated, using obfuscated NZB-Name")
+		new_name = os.path.basename(download_dir) + os.path.splitext(filename)[1]
+
+	return new_name
+
+def remove_year(title):
+	""" Removes year from series name (if exist) """
+	m = re.compile('..*(\((19|20)\d\d\))').search(title)
+	if not m:
+		m = re.compile('..*((19|20)\d\d)').search(title)
+	if m:
+		if verbose:
+			print('Removing year from series name')
+		title = title.replace(m.group(1), '').strip()
+	return title
+
+def apply_dnzb_headers(guess):
+	""" Applies DNZB headers (if exist) """
+
+	dnzb_used = False
+	if dnzb_proper_name != '':
+		dnzb_used = True
+		if verbose:
+			print('Using DNZB-ProperName')
+		if guess['vtype'] == 'series':
+			proper_name = dnzb_proper_name
+			if not series_year:
+				proper_name = remove_year(proper_name)
+			guess['series'] = proper_name
+		else:
+			guess['title'] = dnzb_proper_name
+
+	if dnzb_episode_name != '' and guess['vtype'] == 'series':
+		dnzb_used = True
+		if verbose:
+			print('Using DNZB-EpisodeName')
+		guess['title'] = dnzb_episode_name
+
+	if dnzb_movie_year != '':
+		dnzb_used = True
+		if verbose:
+			print('Using DNZB-MovieYear')
+		guess['year'] = dnzb_movie_year
+
+	if dnzb_more_info != '':
+		dnzb_used = True
+		if verbose:
+			print('Using DNZB-MoreInfo')
+		if guess['type'] == 'movie':
+			regex = re.compile(r'^http://www.imdb.com/title/(tt[0-9]+)/$', re.IGNORECASE)
+			matches = regex.match(dnzb_more_info)
+			if matches:
+				guess['imdb'] = matches.group(1)
+				guess['cpimdb'] = 'cp(' + guess['imdb'] + ')'
+
+	if verbose and dnzb_used:
+		print(guess.nice_string())
+
 def guess_info(filename):
 	""" Parses the filename using guessit-library """
 
-	use_nzbname = force_nzbname
-	
-	if not use_nzbname:
-		fn = os.path.splitext(os.path.basename(filename))[0]
-		if fn.find('.')==-1 and fn.find('_')==-1 and fn.find(' ')==-1:
-			print("Detected obfuscated filename %s, using NZB-Name instead" % os.path.basename(filename))
-			use_nzbname = True
-
-	if use_nzbname:
-		guessfilename = os.path.join(os.path.dirname(filename), os.path.basename(download_dir)) + os.path.splitext(filename)[1]
-	else:
-		guessfilename = filename
-
+	guessfilename = deobfuscate_path(filename)
 	if verbose:
 		print('Guessing: %s' % guessfilename)
 
@@ -818,6 +919,9 @@ def guess_info(filename):
 	elif guess['type'] == 'episode':
 		guess['vtype'] = 'series'
 
+	if dnzb_headers:
+		apply_dnzb_headers(guess)
+		
 	if verbose:
 		print('Type: %s' % guess['vtype'])
 	
@@ -829,7 +933,7 @@ def construct_path(filename):
 	if verbose:
 		print("filename: %s" % filename)
 
-	guess = guess_info(filename);
+	guess = guess_info(filename)
 	type = guess.get('vtype')
 	mapping = []
 	add_common_mapping(filename, guess, mapping)

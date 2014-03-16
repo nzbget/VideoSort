@@ -1,3 +1,10 @@
+videosort-5.0:
+  - improved matching of subtitles to releases (thanks Chris Hamilton for the patch);
+  - added nfo deep scan to improve matching of nfo files (thanks Chris Hamilton for the patch);
+  - new option "PreferNZBName";
+  - fixed: script may crash on certain tv show names when option "SeriesYear" was active;
+  - updated guessit-library to the newest release - this includes support for the autodetection of nfo files;
+
 videosort-4.0:
   - improved detection of obfuscated file and directory names;
   - added support for DNZB-Headers "X-DNZB-ProperName", "X-DNZB-EpisodeName",

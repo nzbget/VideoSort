@@ -2,7 +2,7 @@
 #
 # VideoSort post-processing script for NZBGet.
 #
-# Copyright (C) 2013 Andrey Prygunkov <hugbug@users.sourceforge.net>
+# Copyright (C) 2013-2014 Andrey Prygunkov <hugbug@users.sourceforge.net>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -34,9 +34,9 @@
 #
 # Info about pp-script:
 # Author: Andrey Prygunkov (nzbget@gmail.com).
-# Web-site: http://nzbget.sourceforge.net/VideoSort.
+# Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 4.3.
+# PP-Script Version: 5.0.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -248,7 +248,7 @@ import traceback
 import re
 import shutil
 import guessit
-import guessit.patterns
+import guessit.patterns.extension
 import difflib
 
 # Exit codes used by NZBGet
@@ -413,8 +413,8 @@ def move_satellites(videofile, dest):
             # Handle subtitles and nfo files
             subpart = ''
             # We support GuessIt supported subtitle extensions
-            if fext[1:].lower() in guessit.patterns.subtitle_exts:
-                guess = guessit.guess_file_info(filename, 'autodetect', info=['filename'])
+            if fext[1:].lower() in guessit.patterns.extension.subtitle_exts:
+                guess = guessit.guess_file_info(filename, info=['filename'])
                 if guess and 'subtitleLanguage' in guess:
                     fbase = fbase[:fbase.rfind('.')]
                     # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
@@ -450,7 +450,7 @@ def deep_scan_nfo(filename, ratio=deep_scan_ratio):
         # Convert file content into iterable words
         for word in ''.join([item for item in nfo.readlines()]).split():
             try:
-                guess = guessit.guess_file_info(word + '.nfo', 'autodetect', info=['filename'])
+                guess = guessit.guess_file_info(word + '.nfo', info=['filename'])
                 # Series = TV, Title = Movie
                 if any(item in guess for item in ('series', 'title')):
                     # Compare word against NZB name
@@ -983,7 +983,8 @@ def guess_info(filename):
         last_node = None
         for node in mtree.nodes():
             if node.guess:
-                if last_node != None and node.guess.get('year') != None and last_node.guess.get('series') != None:
+                if last_node != None and node.guess.get('year') != None and \
+                  last_node.guess.get('series') != None and guess['season'] != guess['year']:
                     guess['series'] += ' ' + str(node.guess['year'])
                     if verbose:
                         print('year is part of title')

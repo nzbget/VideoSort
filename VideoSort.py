@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 5.0.
+# PP-Script Version: 5.1.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -180,7 +180,8 @@
 
 # Formatting rules for other TV shows.
 #
-# All specifiers are same as in option <MoviesFormat>.
+# The specifiers are same as in option <SeriesFormat> except
+# that the episode number is not available.
 #OtherTvFormat=%t
 
 # List of words to keep in lower case.
@@ -956,7 +957,8 @@ def guess_info(filename):
     if verbose:
         print('Guessing: %s' % guessfilename)
 
-    matcher = guessit.matcher.IterativeMatcher(unicode(guessfilename), filetype='autodetect', opts=['nolanguage', 'nocountry'])
+    type = 'episode' if force_tv else None
+    matcher = guessit.matcher.IterativeMatcher(unicode(guessfilename), filetype='autodetect', type=type, nolanguage=1, nocountry=1)
     mtree = matcher.match_tree
     guess = matcher.matched()
 
@@ -971,11 +973,18 @@ def guess_info(filename):
     # if guessit doesn't find a year in the file name it thinks it is episode,
     # but we prefer it to be handled as movie instead
     if guess.get('type') == 'episode' and guess.get('episodeNumber', '') == '':
-        guess['type'] = 'movie'
-        guess['title'] = guess.get('series')
-        guess['year'] = '1900'
+        if force_tv:
+            if guess.get('season') == None:
+                guess['season'] = guess['year'] if guess.get('year') not in [None, ''] else 0
+            if guess.get('episode') == None:
+                guess['episode'] = 0
+        else:
+            guess['type'] = 'movie'
+            guess['title'] = guess.get('series')
+            guess['year'] = '1900'
+            if verbose:
+                print('episode without episodeNumber is a movie')
         if verbose:
-            print('episode without episodeNumber is a movie')
             print(guess.nice_string())
 
     # detect if year is part of series name
@@ -996,18 +1005,19 @@ def guess_info(filename):
         date = guess.get('date')
         if date:
             guess['vtype'] = 'dated'
-        elif force_tv:
-            guess['vtype'] = 'othertv'
         else:
             guess['vtype'] = 'movie'
     elif guess['type'] == 'episode':
-        guess['vtype'] = 'series'
+        if guess.get('episodeNumber', '') == '':
+            guess['vtype'] = 'othertv'
+        else:
+            guess['vtype'] = 'series'
     else:
         guess['vtype'] = guess['type']
 
     if dnzb_headers:
         apply_dnzb_headers(guess)
-        
+
     if verbose:
         print('Type: %s' % guess['vtype'])
 
@@ -1039,7 +1049,7 @@ def construct_path(filename):
     elif type == 'othertv':
         dest_dir = othertv_dir
         format = othertv_format
-        add_movies_mapping(guess, mapping)
+        add_series_mapping(guess, mapping)
     else:
         if verbose:
             print('Could not determine video type for %s' % filename)

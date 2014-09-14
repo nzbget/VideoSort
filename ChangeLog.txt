@@ -1,3 +1,6 @@
+videosort-5.1:
+  - for tv shows of type "other tv" the format string (option "OtherTvFormat") is now similar to format string of seasoned tv shows except that the episode number is not available; that provides better sorting for tv shows without episode numbers but with episode names;
+
 videosort-5.0:
   - improved matching of subtitles to releases (thanks Chris Hamilton for the patch);
   - added nfo deep scan to improve matching of nfo files (thanks Chris Hamilton for the patch);

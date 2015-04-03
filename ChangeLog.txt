@@ -1,3 +1,6 @@
+videosort-6.1:
+  - updated library babelfish used by guessit; this fixes a rare error regarding unicode characters.
+
 videosort-6.0:
   - added support for "part"s; they are now treated as episodes;
   - fixed: certain words were stripped from titles;

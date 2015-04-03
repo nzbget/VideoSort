@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014 the BabelFish authors. All rights reserved.
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
@@ -17,10 +17,7 @@ class OpenSubtitlesConverter(LanguageReverseConverter):
         self.to_opensubtitles = {('por', 'BR'): 'pob', ('gre', None): 'ell', ('srp', None): 'scc', ('srp', 'ME'): 'mne'}
         self.from_opensubtitles = CaseInsensitiveDict({'pob': ('por', 'BR'), 'pb': ('por', 'BR'), 'ell': ('ell', None),
                                                        'scc': ('srp', None), 'mne': ('srp', 'ME')})
-
-    @property
-    def codes(self):
-        return (self.alpha2_converter.codes | self.alpha3b_converter.codes | frozenset(['pob', 'pb', 'scc', 'mne']))
+        self.codes = (self.alpha2_converter.codes | self.alpha3b_converter.codes | set(['pob', 'pb', 'scc', 'mne']))
 
     def convert(self, alpha3, country=None, script=None):
         alpha3b = self.alpha3b_converter.convert(alpha3, country, script)

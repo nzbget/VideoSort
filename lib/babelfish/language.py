@@ -1,18 +1,33 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014 the BabelFish authors. All rights reserved.
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
 from __future__ import unicode_literals
+from collections import namedtuple
 from functools import partial
+from pkg_resources import resource_stream  # @UnresolvedImport
 from .converters import ConverterManager
 from .country import Country
 from .exceptions import LanguageConvertError
 from .script import Script
-from .iso import get_languages_data
+from . import basestr
 
-LANGUAGES = frozenset(lang.alpha3 for lang in get_languages_data())
+
+LANGUAGES = set()
+LANGUAGE_MATRIX = []
+
+#: The namedtuple used in the :data:`LANGUAGE_MATRIX`
+IsoLanguage = namedtuple('IsoLanguage', ['alpha3', 'alpha3b', 'alpha3t', 'alpha2', 'scope', 'type', 'name', 'comment'])
+
+f = resource_stream('babelfish', 'data/iso-639-3.tab')
+f.readline()
+for l in f:
+    iso_language = IsoLanguage(*l.decode('utf-8').split('\t'))
+    LANGUAGES.add(iso_language.alpha3)
+    LANGUAGE_MATRIX.append(iso_language)
+f.close()
 
 
 class LanguageConverterManager(ConverterManager):
@@ -35,10 +50,10 @@ class LanguageMeta(type):
     Dynamically redirect :meth:`Language.frommycode` to :meth:`Language.fromcode` with the ``mycode`` `converter`
 
     """
-    def __getattr__(self, name):
+    def __getattr__(cls, name):
         if name.startswith('from'):
-            return partial(self.fromcode, converter=name[4:])
-        return getattr(self, name)
+            return partial(cls.fromcode, converter=name[4:])
+        return type.__getattribute__(cls, name)
 
 
 class Language(LanguageMeta(str('LanguageBase'), (object,), {})):
@@ -121,6 +136,12 @@ class Language(LanguageMeta(str('LanguageBase'), (object,), {})):
                 break
         return language
 
+    def __getstate__(self):
+        return self.alpha3, self.country, self.script
+
+    def __setstate__(self, state):
+        self.alpha3, self.country, self.script = state
+
     def __getattr__(self, name):
         alpha3 = self.alpha3
         country = self.country.alpha2 if self.country is not None else None
@@ -134,9 +155,13 @@ class Language(LanguageMeta(str('LanguageBase'), (object,), {})):
         return hash(str(self))
 
     def __eq__(self, other):
-        if other is None:
+        if isinstance(other, basestr):
+            return str(self) == other
+        if not isinstance(other, Language):
             return False
-        return self.alpha3 == other.alpha3 and self.country == other.country and self.script == other.script
+        return (self.alpha3 == other.alpha3 and
+                self.country == other.country and
+                self.script == other.script)
 
     def __ne__(self, other):
         return not self == other

@@ -1,4 +1,4 @@
-# Copyright (c) 2014 the BabelFish authors. All rights reserved.
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
@@ -140,6 +140,7 @@ class LanguageEquivalenceConverter(LanguageReverseConverter):
     CASE_SENSITIVE = False
 
     def __init__(self):
+        self.codes = set()
         self.to_symbol = {}
         if self.CASE_SENSITIVE:
             self.from_symbol = {}
@@ -149,10 +150,7 @@ class LanguageEquivalenceConverter(LanguageReverseConverter):
         for alpha3, symbol in self.SYMBOLS.items():
             self.to_symbol[alpha3] = symbol
             self.from_symbol[symbol] = (alpha3, None, None)
-
-    @property
-    def codes(self):
-        return frozenset(self.from_symbol.keys())
+            self.codes.add(symbol)
 
     def convert(self, alpha3, country=None, script=None):
         try:
@@ -243,7 +241,14 @@ class ConverterManager(object):
                 return self.converters[ep.name]
         for ep in (EntryPoint.parse(c) for c in self.registered_converters + self.internal_converters):
             if ep.name == name:
-                self.converters[ep.name] = ep.load(require=False)()
+                # `require` argument of ep.load() is deprecated in newer versions of setuptools
+                if hasattr(ep, 'resolve'):
+                    plugin = ep.resolve()
+                elif hasattr(ep, '_load'):
+                    plugin = ep._load()
+                else:
+                    plugin = ep.load(require=False)
+                self.converters[ep.name] = plugin()
                 return self.converters[ep.name]
         raise KeyError(name)
 

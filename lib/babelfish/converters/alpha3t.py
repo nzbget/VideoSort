@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014 the BabelFish authors. All rights reserved.
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
 from __future__ import unicode_literals
 from . import LanguageEquivalenceConverter
-from ..iso import get_languages_data
+from ..language import LANGUAGE_MATRIX
 
 
 class Alpha3TConverter(LanguageEquivalenceConverter):
     CASE_SENSITIVE = True
     SYMBOLS = {}
-    for iso_language in get_languages_data():
+    for iso_language in LANGUAGE_MATRIX:
         if iso_language.alpha3t:
             SYMBOLS[iso_language.alpha3] = iso_language.alpha3t

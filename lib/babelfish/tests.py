@@ -1,24 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014 the BabelFish authors. All rights reserved.
+# Copyright (c) 2013 the BabelFish authors. All rights reserved.
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
 from __future__ import unicode_literals
-
-import mmap
-import random
 import re
 import sys
-import timeit
+import pickle
 from unittest import TestCase, TestSuite, TestLoader, TextTestRunner
-
 from pkg_resources import resource_stream  # @UnresolvedImport
-
-from . import (LANGUAGES, Language, Country, Script, language_converters, country_converters,
+from babelfish import (LANGUAGES, Language, Country, Script, language_converters, country_converters,
     LanguageReverseConverter, LanguageConvertError, LanguageReverseError, CountryReverseError)
-from .utils import ArrayDataTable, MmapDataTable
 
 
 if sys.version_info[:2] <= (2, 6):
@@ -125,6 +119,9 @@ class TestScript(TestCase, _Py26FixTestCase):
     def test_hash(self):
         self.assertEqual(hash(Script('Hira')), hash('Hira'))
 
+    def test_pickle(self):
+        self.assertEqual(pickle.loads(pickle.dumps(Script('Latn'))), Script('Latn'))
+
 
 class TestCountry(TestCase, _Py26FixTestCase):
     def test_wrong_country(self):
@@ -139,6 +136,10 @@ class TestCountry(TestCase, _Py26FixTestCase):
 
     def test_hash(self):
         self.assertEqual(hash(Country('US')), hash('US'))
+
+    def test_pickle(self):
+        for country in [Country('GB'), Country('US')]:
+            self.assertEqual(pickle.loads(pickle.dumps(country)), country)
 
     def test_converter_name(self):
         self.assertEqual(Country('US').name, 'UNITED STATES')
@@ -315,6 +316,13 @@ class TestLanguage(TestCase, _Py26FixTestCase):
         self.assertEqual(hash(Language('srp', script='Cyrl')), hash('sr-Cyrl'))
         self.assertEqual(hash(Language('eng', 'US', 'Latn')), hash('en-US-Latn'))
 
+    def test_pickle(self):
+        for lang in [Language('fra'),
+                     Language('eng', 'US'),
+                     Language('srp', script='Latn'),
+                     Language('eng', 'US', 'Latn')]:
+            self.assertEqual(pickle.loads(pickle.dumps(lang)), lang)
+
     def test_str(self):
         self.assertEqual(Language.fromietf(str(Language('eng', 'US', 'Latn'))), Language('eng', 'US', 'Latn'))
         self.assertEqual(Language.fromietf(str(Language('fra', 'FR'))), Language('fra', 'FR'))
@@ -347,159 +355,14 @@ class TestLanguage(TestCase, _Py26FixTestCase):
         self.assertRaises(KeyError, lambda: Language.fromtest('test1'))
         self.assertRaises(AttributeError, lambda: Language('fra').test)
 
-    def test_performance(self):
-        languages = list(LANGUAGES)
-        count = 100000
-        load_count = 100
-
-        def test_name():
-            random_language = random.choice(languages)
-            l = Language(random_language)
-            name = l.name
-
-        def test_opensubtitle():
-            random_language = random.choice(languages)
-            l = Language(random_language)
-            try:
-                opensubtitles = l.opensubtitles
-            except LanguageConvertError:
-                pass
-
-        del language_converters['name']
-        from .converters import name
-
-        def test_load_converter():
-            language_converters['name'] = name.NameConverter()
-            del language_converters['name']
-
-        print()
-
-        timer = timeit.timeit(test_name, number=count)
-        print("%s name calls in %.3fs" % (count, timer))
-
-        timer = timeit.timeit(test_opensubtitle, number=count)
-        print("%s opensubtitle calls in %.3fs" % (count, timer))
-
-        timer = timeit.timeit(test_load_converter, number=load_count)
-        print("%s NameConverter loading in %.3fs" % (load_count, timer))
-
-
-class TestUtils(TestCase, _Py26FixTestCase):
-    def test_array_data_table(self):
-        f = resource_stream('babelfish', 'data/iso-639-3.tab')
-        f.readline()
-        table = ArrayDataTable(f)
-        f.close()
-
-        self.assertEqual(len(table), 7874)
-
-        self.assertEqual(table.get(0, 0), 'aaa')
-        self.assertEqual(table.get(0, 1), '')
-        self.assertEqual(table.get(0, 2), '')
-        self.assertEqual(table.get(0, 3), '')
-        self.assertEqual(table.get(0, 4), 'I')
-        self.assertEqual(table.get(0, 5), 'L')
-        self.assertEqual(table.get(0, 6), 'Ghotuo')
-
-        self.assertEqual(table.get(1, 0), 'aab')
-        self.assertEqual(table.get(1, 1), '')
-        self.assertEqual(table.get(1, 2), '')
-        self.assertEqual(table.get(1, 3), '')
-        self.assertEqual(table.get(1, 4), 'I')
-        self.assertEqual(table.get(1, 5), 'L')
-        self.assertEqual(table.get(1, 6), 'Alumu-Tesu')
-
-        self.assertEqual(table.get(1947, 0), 'fra')
-        self.assertEqual(table.get(1947, 1), 'fre')
-        self.assertEqual(table.get(1947, 2), 'fra')
-        self.assertEqual(table.get(1947, 3), 'fr')
-        self.assertEqual(table.get(1947, 4), 'I')
-        self.assertEqual(table.get(1947, 5), 'L')
-        self.assertEqual(table.get(1947, 6), 'French')
-
-        self.assertEqual(table.get(3132, 0), 'kmv')
-        self.assertEqual(table.get(3132, 1), '')
-        self.assertEqual(table.get(3132, 2), '')
-        self.assertEqual(table.get(3132, 3), '')
-        self.assertEqual(table.get(3132, 4), 'I')
-        self.assertEqual(table.get(3132, 5), 'L')
-        self.assertEqual(table.get(3132, 6), 'Karipúna Creole French')
-
-        f = resource_stream('babelfish', 'data/iso-639-3.tab')
-        f.readline()
-        table = ArrayDataTable(f, skip_columns=set((1, 2, 3, 4, 5)))
-        f.close()
-
-        self.assertEqual(table.get(1947, 0), 'fra')
-        self.assertEqual(table.get(1947, 1), 'French')
-
-        self.assertEqual(table.get(3132, 0), 'kmv')
-        self.assertEqual(table.get(3132, 1), 'Karipúna Creole French')
-
-    def test_mmap_data_table(self):
-        f = resource_stream('babelfish', 'data/iso-639-3.tab')
-        mmap_object = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
-        try:
-            mmap_object.readline()
-
-            table = MmapDataTable(mmap_object)
-
-            self.assertEqual(len(table), 7874)
-
-            self.assertEqual(table.get(0, 0), 'aaa')
-            self.assertEqual(table.get(0, 1), '')
-            self.assertEqual(table.get(0, 2), '')
-            self.assertEqual(table.get(0, 3), '')
-            self.assertEqual(table.get(0, 4), 'I')
-            self.assertEqual(table.get(0, 5), 'L')
-            self.assertEqual(table.get(0, 6), 'Ghotuo')
-
-            self.assertEqual(table.get(1, 0), 'aab')
-            self.assertEqual(table.get(1, 1), '')
-            self.assertEqual(table.get(1, 2), '')
-            self.assertEqual(table.get(1, 3), '')
-            self.assertEqual(table.get(1, 4), 'I')
-            self.assertEqual(table.get(1, 5), 'L')
-            self.assertEqual(table.get(1, 6), 'Alumu-Tesu')
-
-            self.assertEqual(table.get(1947, 0), 'fra')
-            self.assertEqual(table.get(1947, 1), 'fre')
-            self.assertEqual(table.get(1947, 2), 'fra')
-            self.assertEqual(table.get(1947, 3), 'fr')
-            self.assertEqual(table.get(1947, 4), 'I')
-            self.assertEqual(table.get(1947, 5), 'L')
-            self.assertEqual(table.get(1947, 6), 'French')
-
-            self.assertEqual(table.get(3132, 0), 'kmv')
-            self.assertEqual(table.get(3132, 1), '')
-            self.assertEqual(table.get(3132, 2), '')
-            self.assertEqual(table.get(3132, 3), '')
-            self.assertEqual(table.get(3132, 4), 'I')
-            self.assertEqual(table.get(3132, 5), 'L')
-            self.assertEqual(table.get(3132, 6), 'Karipúna Creole French')
-
-            mmap_object.seek(0)
-            mmap_object.readline()
-            table = MmapDataTable(mmap_object, skip_columns=set((1, 2, 3, 4, 5)))
-
-            self.assertEqual(table.get(1947, 0), 'fra')
-            self.assertEqual(table.get(1947, 1), 'French')
-
-            self.assertEqual(table.get(3132, 0), 'kmv')
-            self.assertEqual(table.get(3132, 1), 'Karipúna Creole French')
-
-        finally:
-            mmap_object.close()
-            f.close()
-
 
 def suite():
     suite = TestSuite()
     suite.addTest(TestLoader().loadTestsFromTestCase(TestScript))
     suite.addTest(TestLoader().loadTestsFromTestCase(TestCountry))
     suite.addTest(TestLoader().loadTestsFromTestCase(TestLanguage))
-    suite.addTest(TestLoader().loadTestsFromTestCase(TestUtils))
     return suite
+
 
 if __name__ == '__main__':
     TextTestRunner().run(suite())

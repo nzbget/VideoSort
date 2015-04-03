@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 6.0.
+# PP-Script Version: 6.1.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 

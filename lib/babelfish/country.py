@@ -4,13 +4,27 @@
 # Use of this source code is governed by the 3-clause BSD license
 # that can be found in the LICENSE file.
 #
-
-
+from __future__ import unicode_literals
+from collections import namedtuple
 from functools import partial
+from pkg_resources import resource_stream  # @UnresolvedImport
 from .converters import ConverterManager
-from .iso import get_countries_data
+from . import basestr
 
-COUNTRIES = frozenset(country.alpha2 for country in get_countries_data())
+
+COUNTRIES = {}
+COUNTRY_MATRIX = []
+
+#: The namedtuple used in the :data:`COUNTRY_MATRIX`
+IsoCountry = namedtuple('IsoCountry', ['name', 'alpha2'])
+
+f = resource_stream('babelfish', 'data/iso-3166-1.txt')
+f.readline()
+for l in f:
+    iso_country = IsoCountry(*l.decode('utf-8').strip().split(';'))
+    COUNTRIES[iso_country.alpha2] = iso_country.name
+    COUNTRY_MATRIX.append(iso_country)
+f.close()
 
 
 class CountryConverterManager(ConverterManager):
@@ -27,10 +41,10 @@ class CountryMeta(type):
     Dynamically redirect :meth:`Country.frommycode` to :meth:`Country.fromcode` with the ``mycode`` `converter`
 
     """
-    def __getattr__(self, name):
+    def __getattr__(cls, name):
         if name.startswith('from'):
-            return partial(self.fromcode, converter=name[4:])
-        return getattr(self, name)
+            return partial(cls.fromcode, converter=name[4:])
+        return type.__getattribute__(cls, name)
 
 
 class Country(CountryMeta(str('CountryBase'), (object,), {})):
@@ -61,6 +75,12 @@ class Country(CountryMeta(str('CountryBase'), (object,), {})):
         """
         return cls(country_converters[converter].reverse(code))
 
+    def __getstate__(self):
+        return self.alpha2
+
+    def __setstate__(self, state):
+        self.alpha2 = state
+
     def __getattr__(self, name):
         return country_converters[name].convert(self.alpha2)
 
@@ -68,7 +88,9 @@ class Country(CountryMeta(str('CountryBase'), (object,), {})):
         return hash(self.alpha2)
 
     def __eq__(self, other):
-        if other is None:
+        if isinstance(other, basestr):
+            return str(self) == other
+        if not isinstance(other, Country):
             return False
         return self.alpha2 == other.alpha2
 

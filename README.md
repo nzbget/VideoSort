@@ -79,7 +79,7 @@ These specifiers can be used with all three types of supported video files:
  - %qac - audio codec (DTS);
  - %qah - audio channels (5.1);
  - %qrg - release group;
- - { {text}} - uppercase the text;
+ - {{text}} - uppercase the text;
  - {TEXT} - lowercase the text;
 
 Credits

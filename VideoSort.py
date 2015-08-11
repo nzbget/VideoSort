@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 6.1.
+# PP-Script Version: 7.0-testing.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -110,8 +110,16 @@
 # %cpimdb         - IMDb ID (formatted for CouchPotato);
 #
 # Common specifiers (for movies, series and dated tv shows):
-# %dn             - original directory name (nzb-name);
-# %fn             - original filename;
+# %dn              - original directory name (nzb-name);
+# %^dn, %.dn, %_dn - directory name with words separated with spaces, dots
+#                    or underscores (case-adjusted);
+# %^dN, %.dN, %_dN - directory name with words separated with spaces, dots
+#                    or underscores (original letter case);
+# %fn              - original filename;
+# %^fn, %.fn, %_fn - filename with words separated with spaces, dots
+#                    or underscores (case-adjusted);
+# %^fN, %.fN, %_fN - filename with words separated with spaces, dots
+#                    or underscores (original letter case);
 # %cat, %.cat, %_cat - category with words separated with spaces, dots
 #                   or underscores (case-adjusted);
 # %cAt, %.cAt, %_cAt - category (original letter case);
@@ -683,8 +691,32 @@ def add_common_mapping(old_filename, guess, mapping):
     original_dirname = os.path.basename(download_dir)
     original_fname, original_fext = os.path.splitext(os.path.split(os.path.basename(old_filename))[1])
     original_category = os.environ.get('NZBPP_CATEGORY', '')
+
+    # Directory name
+    title_name = original_dirname.replace("-", " ").replace('.',' ').replace('_',' ')
+    fname_tname, fname_tname_two, fname_tname_three = get_titles(title_name, True)
+    fname_name, fname_name_two, fname_name_three = get_titles(title_name, False)
     mapping.append(('%dn', original_dirname))
+    mapping.append(('%^dn', fname_tname))
+    mapping.append(('%.dn', fname_tname_two))
+    mapping.append(('%_dn', fname_tname_three))
+    mapping.append(('%^dN', fname_name))
+    mapping.append(('%.dN', fname_name_two))
+    mapping.append(('%_dN', fname_name_three))
+
+    # File name
+    title_name = original_fname.replace("-", " ").replace('.',' ').replace('_',' ')
+    fname_tname, fname_tname_two, fname_tname_three = get_titles(title_name, True)
+    fname_name, fname_name_two, fname_name_three = get_titles(title_name, False)
     mapping.append(('%fn', original_fname))
+    mapping.append(('%^fn', fname_tname))
+    mapping.append(('%.fn', fname_tname_two))
+    mapping.append(('%_fn', fname_tname_three))
+    mapping.append(('%^fN', fname_name))
+    mapping.append(('%.fN', fname_name_two))
+    mapping.append(('%_fN', fname_name_three))
+
+    # File extension
     mapping.append(('%ext', original_fext))
     mapping.append(('%EXT', original_fext.upper()))
     mapping.append(('%Ext', original_fext.title()))

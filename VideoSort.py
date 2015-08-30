@@ -384,6 +384,14 @@ def unique_name(new):
         suffix_num += 1
     return new_name
 
+def optimized_move(old, new):
+    try:
+        os.rename(old, new)
+    except OSError as ex:
+        print('[DETAIL] Rename failed ({}), performing copy: {}'.format(ex, new))
+        shutil.copyfile(old, new)
+        os.remove(old)
+
 def rename(old, new):
     """ Moves the file to its sorted location.
         It creates any necessary directories to place the new file and moves it.
@@ -391,7 +399,7 @@ def rename(old, new):
     if os.path.exists(new) or new in moved_dst_files:
         if overwrite and new not in moved_dst_files:
             os.remove(new)
-            shutil.move(old, new)
+            optimized_move(old, new)
             print('[INFO] Overwrote: %s' % new)
         else:
             # rename to filename.(2).ext, filename.(3).ext, etc.
@@ -401,7 +409,7 @@ def rename(old, new):
         if not preview:
             if not os.path.exists(os.path.dirname(new)):
                 os.makedirs(os.path.dirname(new))
-            shutil.move(old, new)
+            optimized_move(old, new)
         print('[INFO] Moved: %s' % new)
     moved_src_files.append(old)
     moved_dst_files.append(new)

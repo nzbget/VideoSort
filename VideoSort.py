@@ -425,39 +425,41 @@ def move_satellites(videofile, dest):
     root = os.path.dirname(videofile)
     destbasenm = os.path.splitext(dest)[0]
     base = os.path.basename(os.path.splitext(videofile)[0])
-    for filename in os.listdir(root):
-        fbase, fext = os.path.splitext(filename)
-        fextlo = fext.lower()
+    for (dirpath, dirnames, filenames) in os.walk(root):
+        for filename in filenames:
+            fbase, fext = os.path.splitext(filename)
+            fextlo = fext.lower()
+            fpath = os.path.join(dirpath, filename)
 
-        if fextlo in satellite_extensions:
-            # Handle subtitles and nfo files
-            subpart = ''
-            # We support GuessIt supported subtitle extensions
-            if fextlo[1:] in guessit.patterns.extension.subtitle_exts:
-                guess = guessit.guess_file_info(filename, info=['filename'])
-                if guess and 'subtitleLanguage' in guess:
-                    fbase = fbase[:fbase.rfind('.')]
-                    # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
-                    subpart = '.' + guess['subtitleLanguage'][0].alpha2
-                if verbose:
-                    if subpart != '':
-                        print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitleLanguage'][0]))
-                    else:
-                        # English (or undetermined)
-                        print('Satellite: %s is a subtitle' % filename)
-            elif fbase.lower() != base.lower() and fextlo == '.nfo':
-                # Aggressive match attempt
-                if deep_scan:
-                    guess = deep_scan_nfo(filename)
-                    if guess is not None:
-                        # Guess details are not important, just that there was a match
-                        fbase = base
-            if fbase.lower() == base.lower():
-                old = os.path.join(root, filename)
-                new = destbasenm + subpart + fext
-                if verbose:
-                    print('Satellite: %s' % os.path.basename(new))
-                rename(old, new)
+            if fextlo in satellite_extensions:
+                # Handle subtitles and nfo files
+                subpart = ''
+                # We support GuessIt supported subtitle extensions
+                if fextlo[1:] in guessit.patterns.extension.subtitle_exts:
+                    guess = guessit.guess_file_info(filename, info=['filename'])
+                    if guess and 'subtitleLanguage' in guess:
+                        fbase = fbase[:fbase.rfind('.')]
+                        # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
+                        subpart = '.' + guess['subtitleLanguage'][0].alpha2
+                    if verbose:
+                        if subpart != '':
+                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitleLanguage'][0]))
+                        else:
+                            # English (or undetermined)
+                            print('Satellite: %s is a subtitle' % filename)
+                elif (fbase.lower() != base.lower()) and fextlo == '.nfo':
+                    # Aggressive match attempt
+                    if deep_scan:
+                        guess = deep_scan_nfo(fpath)
+                        if guess is not None:
+                            # Guess details are not important, just that there was a match
+                            fbase = base
+                if fbase.lower() == base.lower():
+                    old = fpath
+                    new = destbasenm + subpart + fext
+                    if verbose:
+                        print('Satellite: %s' % os.path.basename(new))
+                    rename(old, new)
 
 
 def deep_scan_nfo(filename, ratio=deep_scan_ratio):
@@ -466,7 +468,7 @@ def deep_scan_nfo(filename, ratio=deep_scan_ratio):
     best_guess = None
     best_ratio = 0.00
     try:
-        nfo = open(os.path.join(root, filename))
+        nfo = open(filename)
         # Convert file content into iterable words
         for word in ''.join([item for item in nfo.readlines()]).split():
             try:

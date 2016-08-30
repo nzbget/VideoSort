@@ -306,8 +306,8 @@ movies_dir=os.environ['NZBPO_MOVIESDIR']
 series_dir=os.environ['NZBPO_SERIESDIR']
 dated_dir=os.environ['NZBPO_DATEDDIR']
 othertv_dir=os.environ['NZBPO_OTHERTVDIR']
-video_extensions=os.environ['NZBPO_VIDEOEXTENSIONS'].lower().split(',')
-satellite_extensions=os.environ['NZBPO_SATELLITEEXTENSIONS'].lower().split(',')
+video_extensions=os.environ['NZBPO_VIDEOEXTENSIONS'].replace(' ', '').lower().split(',')
+satellite_extensions=os.environ['NZBPO_SATELLITEEXTENSIONS'].replace(' ', '').lower().split(',')
 min_size=int(os.environ['NZBPO_MINSIZE'])
 min_size <<= 20
 overwrite=os.environ['NZBPO_OVERWRITE'] == 'yes'

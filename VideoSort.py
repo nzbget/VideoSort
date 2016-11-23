@@ -354,7 +354,7 @@ dupe_separator = ' '
 
 def guess_dupe_separator(format):
     """ Find out a char most suitable as dupe_separator
-    """ 
+    """
     global dupe_separator
 
     dupe_separator = ' '
@@ -505,12 +505,12 @@ def cleanup_download_dir():
     for root, dirs, files in os.walk(download_dir):
         for filename in files:
             path = os.path.join(root, filename)
-            # Check minimum file size             
+            # Check minimum file size
             if os.path.getsize(path) >= min_size and (not preview or path not in moved_src_files):
                 print('[WARNING] Skipping clean up due to large files remaining in the directory')
                 return
 
-    # Now delete all files with nice logging                
+    # Now delete all files with nice logging
     for root, dirs, files in os.walk(download_dir):
         for filename in files:
             path = os.path.join(root, filename)
@@ -811,7 +811,7 @@ def add_series_mapping(guess, mapping):
     decade, decade_two = get_decades(year)
     mapping.append(('%decade', decade))
     mapping.append(('%0decade', decade_two))
-    
+
 
 def add_movies_mapping(guess, mapping):
 
@@ -879,7 +879,7 @@ def add_dated_mapping(guess, mapping):
 
     # date
     date = guess.get('date')
-    
+
     # year
     year = str(date.year)
     mapping.append(('%year', year))
@@ -1034,9 +1034,17 @@ def guess_info(filename):
     if pad_start_digits:
         if guess['type'] == 'episode':
             guess['series'] = guess['series'][1:]
+            if guess['series'] == '':
+                guess['series'] = os.path.splitext(os.path.basename(guessfilename))[0][1:]
+                if verbose:
+                    print('use filename as series for recovery')
         else:
             guess['title'] = guess['title'][1:]
-            
+            if guess['title'] == '':
+                guess['title'] = os.path.splitext(os.path.basename(guessfilename))[0][1:]
+                if verbose:
+                    print('use filename as title for recovery')
+
     # fix some strange guessit guessing:
     # if guessit doesn't find a year in the file name it thinks it is episode,
     # but we prefer it to be handled as movie instead
@@ -1089,7 +1097,7 @@ def guess_info(filename):
 
     if dnzb_headers:
         apply_dnzb_headers(guess)
-        
+
     if verbose:
         print('Type: %s' % guess['vtype'])
 
@@ -1151,7 +1159,7 @@ def construct_path(filename):
     if verbose:
         print('path after subst: %s' % path)
 
-    # Cleanup file name 
+    # Cleanup file name
     old_path = ''
     while old_path != path:
         old_path = path
@@ -1177,10 +1185,10 @@ def construct_path(filename):
         print('path after cleanup: %s' % path)
 
     new_path = os.path.join(dest_dir, path)
-    
+
     if verbose:
         print('destination path: %s' % new_path)
-        
+
     return new_path
 
 # Flag indicating that anything was moved. Cleanup possible.
@@ -1200,7 +1208,7 @@ for root, dirs, files in os.walk(download_dir):
             # Check extension
             ext = os.path.splitext(old_filename)[1].lower()
             if ext not in video_extensions: continue
-            
+
             # Check minimum file size
             if os.path.getsize(old_path) < min_size:
                 print('[INFO] Skipping small: %s' % old_filename)

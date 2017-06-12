@@ -1189,6 +1189,11 @@ def construct_path(filename):
     if verbose:
         print('destination path: %s' % new_path)
 
+    if filename.upper() == new_path.upper():
+        if verbose:
+            print('Destination path equals filename  - return None')
+        return None
+
     return new_path
 
 # Flag indicating that anything was moved. Cleanup possible.

@@ -252,7 +252,7 @@
 
 import sys
 from os.path import dirname
-sys.path.append(dirname(__file__) + '/lib')
+sys.path.insert(0, dirname(__file__) + '/lib')
 
 import os
 import traceback

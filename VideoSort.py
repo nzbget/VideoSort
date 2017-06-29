@@ -2,7 +2,7 @@
 #
 # VideoSort post-processing script for NZBGet.
 #
-# Copyright (C) 2013-2015 Andrey Prygunkov <hugbug@users.sourceforge.net>
+# Copyright (C) 2013-2017 Andrey Prygunkov <hugbug@users.sourceforge.net>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 7.0-testing.
+# PP-Script Version: 8.0-testing.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 
@@ -154,6 +154,16 @@
 # For a list of common specifiers see option <MoviesFormat>.
 #SeriesFormat=%sn/Season %s/%sn - S%0sE%0e - %en
 
+# Multiple Episodes (list, range).
+#
+# This option is used for seasoned TV shows when the video file includes multiple episodes. For example: the formatting
+# string "S%0sE%0e", combined with "MultipleEpisode=list" and "EpisodeSeparator=E" will result in a file named
+# "My.Show.S01E01E02E03". "MultipleEpisode=range" and "EpisodeSeparator=-E" will result in a file named
+# "My.Show.S01E01-E03.mkv". The "range" option is useful to follow the TV episode naming conventions of popular media
+# management software, such as Plex.
+#
+#MultipleEpisodes=range
+
 # Separator for multi episodes.
 #
 # The option is used for seasoned TV shows when video file includes
@@ -252,14 +262,13 @@
 
 import sys
 from os.path import dirname
-sys.path.append(dirname(__file__) + '/lib')
+sys.path.insert(0, dirname(__file__) + '/lib')
 
 import os
 import traceback
 import re
 import shutil
 import guessit
-import guessit.patterns.extension
 import difflib
 
 # Exit codes used by NZBGet
@@ -301,13 +310,14 @@ movies_format=os.environ['NZBPO_MOVIESFORMAT']
 series_format=os.environ['NZBPO_SERIESFORMAT']
 dated_format=os.environ['NZBPO_DATEDFORMAT']
 othertv_format=os.environ['NZBPO_OTHERTVFORMAT']
+multiple_episodes=os.environ['NZBPO_MULTIPLEEPISODES']
 episode_separator=os.environ['NZBPO_EPISODESEPARATOR']
 movies_dir=os.environ['NZBPO_MOVIESDIR']
 series_dir=os.environ['NZBPO_SERIESDIR']
 dated_dir=os.environ['NZBPO_DATEDDIR']
 othertv_dir=os.environ['NZBPO_OTHERTVDIR']
-video_extensions=os.environ['NZBPO_VIDEOEXTENSIONS'].lower().split(',')
-satellite_extensions=os.environ['NZBPO_SATELLITEEXTENSIONS'].lower().split(',')
+video_extensions=os.environ['NZBPO_VIDEOEXTENSIONS'].replace(' ', '').lower().split(',')
+satellite_extensions=os.environ['NZBPO_SATELLITEEXTENSIONS'].replace(' ', '').lower().split(',')
 min_size=int(os.environ['NZBPO_MINSIZE'])
 min_size <<= 20
 overwrite=os.environ['NZBPO_OVERWRITE'] == 'yes'
@@ -354,7 +364,7 @@ dupe_separator = ' '
 
 def guess_dupe_separator(format):
     """ Find out a char most suitable as dupe_separator
-    """ 
+    """
     global dupe_separator
 
     dupe_separator = ' '
@@ -425,39 +435,41 @@ def move_satellites(videofile, dest):
     root = os.path.dirname(videofile)
     destbasenm = os.path.splitext(dest)[0]
     base = os.path.basename(os.path.splitext(videofile)[0])
-    for filename in os.listdir(root):
-        fbase, fext = os.path.splitext(filename)
-        fextlo = fext.lower()
+    for (dirpath, dirnames, filenames) in os.walk(root):
+        for filename in filenames:
+            fbase, fext = os.path.splitext(filename)
+            fextlo = fext.lower()
+            fpath = os.path.join(dirpath, filename)
 
-        if fextlo in satellite_extensions:
-            # Handle subtitles and nfo files
-            subpart = ''
-            # We support GuessIt supported subtitle extensions
-            if fextlo[1:] in guessit.patterns.extension.subtitle_exts:
-                guess = guessit.guess_file_info(filename, info=['filename'])
-                if guess and 'subtitleLanguage' in guess:
-                    fbase = fbase[:fbase.rfind('.')]
-                    # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
-                    subpart = '.' + guess['subtitleLanguage'][0].alpha2
-                if verbose:
-                    if subpart != '':
-                        print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitleLanguage'][0]))
-                    else:
-                        # English (or undetermined)
-                        print('Satellite: %s is a subtitle' % filename)
-            elif fbase.lower() != base.lower() and fextlo == '.nfo':
-                # Aggressive match attempt
-                if deep_scan:
-                    guess = deep_scan_nfo(filename)
-                    if guess is not None:
-                        # Guess details are not important, just that there was a match
-                        fbase = base
-            if fbase.lower() == base.lower():
-                old = os.path.join(root, filename)
-                new = destbasenm + subpart + fext
-                if verbose:
-                    print('Satellite: %s' % os.path.basename(new))
-                rename(old, new)
+            if fextlo in satellite_extensions:
+                # Handle subtitles and nfo files
+                subpart = ''
+                # We support GuessIt supported subtitle extensions
+                if fextlo[1:] in guessit.patterns.extension.subtitle_exts:
+                    guess = guessit.guess_file_info(filename, info=['filename'])
+                    if guess and 'subtitleLanguage' in guess:
+                        fbase = fbase[:fbase.rfind('.')]
+                        # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
+                        subpart = '.' + guess['subtitleLanguage'][0].alpha2
+                    if verbose:
+                        if subpart != '':
+                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitleLanguage'][0]))
+                        else:
+                            # English (or undetermined)
+                            print('Satellite: %s is a subtitle' % filename)
+                elif (fbase.lower() != base.lower()) and fextlo == '.nfo':
+                    # Aggressive match attempt
+                    if deep_scan:
+                        guess = deep_scan_nfo(fpath)
+                        if guess is not None:
+                            # Guess details are not important, just that there was a match
+                            fbase = base
+                if fbase.lower() == base.lower():
+                    old = fpath
+                    new = destbasenm + subpart + fext
+                    if verbose:
+                        print('Satellite: %s' % os.path.basename(new))
+                    rename(old, new)
 
 
 def deep_scan_nfo(filename, ratio=deep_scan_ratio):
@@ -466,13 +478,13 @@ def deep_scan_nfo(filename, ratio=deep_scan_ratio):
     best_guess = None
     best_ratio = 0.00
     try:
-        nfo = open(os.path.join(root, filename))
+        nfo = open(filename)
         # Convert file content into iterable words
         for word in ''.join([item for item in nfo.readlines()]).split():
             try:
                 guess = guessit.guess_file_info(word + '.nfo', info=['filename'])
                 # Series = TV, Title = Movie
-                if any(item in guess for item in ('series', 'title')):
+                if any(item in guess for item in ('title')):
                     # Compare word against NZB name
                     diff = difflib.SequenceMatcher(None, word, nzb_name)
                     # Evaluate ratio against threshold and previous matches
@@ -503,12 +515,12 @@ def cleanup_download_dir():
     for root, dirs, files in os.walk(download_dir):
         for filename in files:
             path = os.path.join(root, filename)
-            # Check minimum file size             
+            # Check minimum file size
             if os.path.getsize(path) >= min_size and (not preview or path not in moved_src_files):
                 print('[WARNING] Skipping clean up due to large files remaining in the directory')
                 return
 
-    # Now delete all files with nice logging                
+    # Now delete all files with nice logging
     for root, dirs, files in os.walk(download_dir):
         for filename in files:
             path = os.path.join(root, filename)
@@ -741,16 +753,16 @@ def add_common_mapping(old_filename, guess, mapping):
 
     # Video information
     mapping.append(('%qf', guess.get('format', '')))
-    mapping.append(('%qss', guess.get('screenSize', '')))
-    mapping.append(('%qvc', guess.get('videoCodec', '')))
-    mapping.append(('%qac', guess.get('audioCodec', '')))
-    mapping.append(('%qah', guess.get('audioChannels', '')))
-    mapping.append(('%qrg', guess.get('releaseGroup', '')))
+    mapping.append(('%qss', guess.get('screen_size', '')))
+    mapping.append(('%qvc', guess.get('video_codec', '')))
+    mapping.append(('%qac', guess.get('audio_codec', '')))
+    mapping.append(('%qah', guess.get('audio_channels', '')))
+    mapping.append(('%qrg', guess.get('release_group', '')))
 
 def add_series_mapping(guess, mapping):
 
     # Show name
-    series = guess.get('series', '')
+    series = guess.get('title', '')
     show_tname, show_tname_two, show_tname_three = get_titles(series, True)
     show_name, show_name_two, show_name_three = get_titles(series, False)
     mapping.append(('%sn', show_tname))
@@ -766,7 +778,7 @@ def add_series_mapping(guess, mapping):
     mapping.append(('%0s', season_num.rjust(2,'0')))
 
     # episode names
-    title = guess.get('title')
+    title = guess.get('episode_title')
     if title:
         ep_tname, ep_tname_two, ep_tname_three = get_titles(title, True)
         ep_name, ep_name_two, ep_name_three = get_titles(title, False)
@@ -785,18 +797,23 @@ def add_series_mapping(guess, mapping):
         mapping.append(('%e_N', ''))
 
     # episode number
-    if guess.get('episodeList') == None:
-        episode_num = str(guess.get('episodeNumber', ''))
+    if not isinstance(guess.get('episode'), list):
+        episode_num = str(guess.get('episode', ''))
         mapping.append(('%e', episode_num))
         mapping.append(('%0e', episode_num.rjust(2,'0')))
     else:
         # multi episodes
+        episodes = [str(item) for item in guess.get('episode')]
         episode_num_all = ''
         episode_num_just = ''
-        for episode_num in guess.get('episodeList'):
-            ep_prefix = episode_separator if episode_num_all <> '' else ''
-            episode_num_all += ep_prefix + str(episode_num)
-            episode_num_just += ep_prefix + str(episode_num).rjust(2,'0')
+        if multiple_episodes == 'range':
+            episode_num_all = episodes[0] + episode_separator + episodes[-1]
+            episode_num_just = episodes[0].rjust(2, '0') + episode_separator + episodes[-1].rjust(2, '0')
+        else:   # if multiple_episodes == 'list':
+            for episode_num in episodes:
+                ep_prefix = episode_separator if episode_num_all <> '' else ''
+                episode_num_all += ep_prefix + episode_num
+                episode_num_just += ep_prefix + episode_num.rjust(2,'0')
 
         mapping.append(('%e', episode_num_all))
         mapping.append(('%0e', episode_num_just))
@@ -809,7 +826,7 @@ def add_series_mapping(guess, mapping):
     decade, decade_two = get_decades(year)
     mapping.append(('%decade', decade))
     mapping.append(('%0decade', decade_two))
-    
+
 
 def add_movies_mapping(guess, mapping):
 
@@ -877,7 +894,7 @@ def add_dated_mapping(guess, mapping):
 
     # date
     date = guess.get('date')
-    
+
     # year
     year = str(date.year)
     mapping.append(('%year', year))
@@ -968,7 +985,7 @@ def apply_dnzb_headers(guess):
             proper_name = dnzb_proper_name
             if not series_year:
                 proper_name = remove_year(proper_name)
-            guess['series'] = proper_name
+            guess['title'] = proper_name
         else:
             guess['title'] = dnzb_proper_name
 
@@ -996,7 +1013,7 @@ def apply_dnzb_headers(guess):
                 guess['cpimdb'] = 'cp(' + guess['imdb'] + ')'
 
     if verbose and dnzb_used:
-        print(guess.nice_string())
+        print(guess)
 
 def guess_info(filename):
     """ Parses the filename using guessit-library """
@@ -1017,39 +1034,32 @@ def guess_info(filename):
     if verbose:
         print('Guessing: %s' % guessfilename)
 
-    matcher = guessit.matcher.IterativeMatcher(unicode(guessfilename), filetype='autodetect', options={'nolanguage': True, 'nocountry': True})
-    mtree = matcher.match_tree
-    guess = matcher.matched()
+    guess = guessit.api.guessit(unicode(guessfilename), {'allowed_languages': [], 'allowed_countries': []})
 
     if verbose:
-        print(mtree)
-        for node in mtree.nodes():
-            if node.guess:
-                print(node.guess)
-        print(guess.nice_string())
+        print(guess)
 
     # workaround for titles starting with numbers (part 2)
     if pad_start_digits:
-        if guess['type'] == 'episode':
-            guess['series'] = guess['series'][1:]
-        else:
-            guess['title'] = guess['title'][1:]
-            
+        guess['title'] = guess['title'][1:]
+        if guess['title'] == '':
+            guess['title'] = os.path.splitext(os.path.basename(guessfilename))[0][1:]
+            if verbose:
+                print('use filename as title for recovery')
+
     # fix some strange guessit guessing:
     # if guessit doesn't find a year in the file name it thinks it is episode,
     # but we prefer it to be handled as movie instead
-    if guess.get('type') == 'episode' and guess.get('episodeNumber', '') == '':
+    if guess.get('type') == 'episode' and guess.get('episode', '') == '':
         guess['type'] = 'movie'
-        guess['title'] = guess.get('series')
         guess['year'] = '1900'
         if verbose:
-            print('episode without episodeNumber is a movie')
+            print('episode without episode-number is a movie')
 
     # treat parts as episodes ("Part.2" or "Part.II")
     if guess.get('type') == 'movie' and guess.get('part') != None:
         guess['type'] = 'episode'
-        guess['series'] = guess.get('title')
-        guess['episodeNumber'] = guess.get('part')
+        guess['episode'] = guess.get('part')
         if verbose:
             print('treat parts as episodes')
 
@@ -1060,17 +1070,16 @@ def guess_info(filename):
             print('force season 1')
 
     # detect if year is part of series name
-    if guess['type'] == 'episode' and series_year:
-        last_node = None
-        for node in mtree.nodes():
-            if node.guess:
-                if last_node != None and node.guess.get('year') != None and \
-                  last_node.guess.get('series') != None and guess.get('season') != guess.get('year'):
-                    guess['series'] += ' ' + str(node.guess['year'])
-                    if verbose:
-                        print('year is part of title')
-                    break
-                last_node = node
+    if guess['type'] == 'episode':
+        if series_year:
+            if guess.get('year') != None and guess.get('title') != None and \
+                    guess.get('season') != guess.get('year') and \
+                    guess['title'] == remove_year(guess['title']):
+                guess['title'] += ' ' + str(guess['year'])
+                if verbose:
+                    print('year is part of title')
+        else:
+            guess['title'] = remove_year(guess['title'])
 
     if guess['type'] == 'movie':
         date = guess.get('date')
@@ -1087,12 +1096,12 @@ def guess_info(filename):
 
     if dnzb_headers:
         apply_dnzb_headers(guess)
-        
+
     if verbose:
         print('Type: %s' % guess['vtype'])
 
     if verbose:
-        print(guess.nice_string())
+        print(guess)
 
     return guess
 
@@ -1149,7 +1158,7 @@ def construct_path(filename):
     if verbose:
         print('path after subst: %s' % path)
 
-    # Cleanup file name 
+    # Cleanup file name
     old_path = ''
     while old_path != path:
         old_path = path
@@ -1175,10 +1184,15 @@ def construct_path(filename):
         print('path after cleanup: %s' % path)
 
     new_path = os.path.join(dest_dir, path)
-    
+
     if verbose:
         print('destination path: %s' % new_path)
-        
+
+    if filename.upper() == new_path.upper():
+        if verbose:
+            print('Destination path equals filename  - return None')
+        return None
+
     return new_path
 
 # Flag indicating that anything was moved. Cleanup possible.
@@ -1198,7 +1212,7 @@ for root, dirs, files in os.walk(download_dir):
             # Check extension
             ext = os.path.splitext(old_filename)[1].lower()
             if ext not in video_extensions: continue
-            
+
             # Check minimum file size
             if os.path.getsize(old_path) < min_size:
                 print('[INFO] Skipping small: %s' % old_filename)

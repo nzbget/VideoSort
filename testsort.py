@@ -53,6 +53,7 @@ def set_defaults():
 	os.environ['NZBPO_OTHERTVDIR'] = root_dir + '/tv'
 	os.environ['NZBPO_VIDEOEXTENSIONS'] = '.mkv,.mp4,.avi'
 	os.environ['NZBPO_SATELLITEEXTENSIONS'] = '.srt'
+	os.environ['NZBPO_MULTIPLEEPISODES'] = 'list'
 	os.environ['NZBPO_EPISODESEPARATOR'] = '-'
 	os.environ['NZBPO_MINSIZE'] = '0'
 	os.environ['NZBPO_TVCATEGORIES'] = 'tv'

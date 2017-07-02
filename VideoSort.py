@@ -993,7 +993,7 @@ def apply_dnzb_headers(guess):
         dnzb_used = True
         if verbose:
             print('Using DNZB-EpisodeName')
-        guess['title'] = dnzb_episode_name
+        guess['episode_title'] = dnzb_episode_name
 
     if dnzb_movie_year != '':
         dnzb_used = True

@@ -103,6 +103,16 @@
     "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
   },
   {
+    "id": "series-6",
+    "INPUTFILE": "Orphan.Black.S05E04.720p.HDTV.x264-AVS.mkv",
+    "OUTPUTFILE": "/series/Orphan Black/Season 05/Orphan.Black.S05E04.Let.the.Children.the.Childbearers.Toil.mkv",
+    "NZBPO_SERIESYEAR": "yes",
+    "NZBPO_SERIESFORMAT": "%sn/Season %0s/%s.n.S%0sE%0e.%e.n",
+    "NZBPO_DNZBHEADERS": "yes",
+    "NZBPR__DNZB_PROPERNAME": "Orphan Black",
+    "NZBPR__DNZB_EPISODENAME": "Let the Children the Childbearers Toil"
+  },
+  {
     "id": "dated-1",
     "INPUTFILE": "The.Daily.Show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
     "OUTPUTFILE": "/dated/2013-06/The Daily Show - 2013-6-27.mkv",

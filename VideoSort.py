@@ -154,6 +154,16 @@
 # For a list of common specifiers see option <MoviesFormat>.
 #SeriesFormat=%sn/Season %s/%sn - S%0sE%0e - %en
 
+# Multiple Episodes (list, range).
+#
+# This option is used for seasoned TV shows when the video file includes multiple episodes. For example: the formatting
+# string "S%0sE%0e", combined with "MultipleEpisode=list" and "EpisodeSeparator=E" will result in a file named
+# "My.Show.S01E01E02E03". "MultipleEpisode=range" and "EpisodeSeparator=-E" will result in a file named
+# "My.Show.S01E01-E03.mkv". The "range" option is useful to follow the TV episode naming conventions of popular media
+# management software, such as Plex.
+#
+#MultipleEpisodes=range
+
 # Separator for multi episodes.
 #
 # The option is used for seasoned TV shows when video file includes
@@ -300,6 +310,7 @@ movies_format=os.environ['NZBPO_MOVIESFORMAT']
 series_format=os.environ['NZBPO_SERIESFORMAT']
 dated_format=os.environ['NZBPO_DATEDFORMAT']
 othertv_format=os.environ['NZBPO_OTHERTVFORMAT']
+multiple_episodes=os.environ['NZBPO_MULTIPLEEPISODES']
 episode_separator=os.environ['NZBPO_EPISODESEPARATOR']
 movies_dir=os.environ['NZBPO_MOVIESDIR']
 series_dir=os.environ['NZBPO_SERIESDIR']
@@ -792,12 +803,17 @@ def add_series_mapping(guess, mapping):
         mapping.append(('%0e', episode_num.rjust(2,'0')))
     else:
         # multi episodes
+        episodes = [str(item) for item in guess.get('episode')]
         episode_num_all = ''
         episode_num_just = ''
-        for episode_num in guess.get('episode'):
-            ep_prefix = episode_separator if episode_num_all <> '' else ''
-            episode_num_all += ep_prefix + str(episode_num)
-            episode_num_just += ep_prefix + str(episode_num).rjust(2,'0')
+        if multiple_episodes == 'range':
+            episode_num_all = episodes[0] + episode_separator + episodes[-1]
+            episode_num_just = episodes[0].rjust(2, '0') + episode_separator + episodes[-1].rjust(2, '0')
+        else:   # if multiple_episodes == 'list':
+            for episode_num in episodes:
+                ep_prefix = episode_separator if episode_num_all <> '' else ''
+                episode_num_all += ep_prefix + episode_num
+                episode_num_just += ep_prefix + episode_num.rjust(2,'0')
 
         mapping.append(('%e', episode_num_all))
         mapping.append(('%0e', episode_num_just))

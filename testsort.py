@@ -45,7 +45,7 @@ for opt, arg in options:
 def set_defaults():
 	# NZBGet global options
 	os.environ['NZBOP_SCRIPTDIR'] = 'test'
-	
+
 	# script options
 	os.environ['NZBPO_MOVIESDIR'] = root_dir + '/movies'
 	os.environ['NZBPO_SERIESDIR'] = root_dir + '/series'
@@ -68,18 +68,18 @@ def set_defaults():
 	os.environ['NZBPO_CLEANUP'] = 'no'
 	os.environ['NZBPO_PREVIEW'] = 'yes'
 	os.environ['NZBPO_VERBOSE'] = 'yes'
-	
+
 	# properties of nzb-file
 	os.environ['NZBPP_DIRECTORY'] = test_dir
 	os.environ['NZBPP_NZBNAME'] = 'test'
 	os.environ['NZBPP_PARSTATUS'] = '2'
 	os.environ['NZBPP_UNPACKSTATUS'] = '2'
 	os.environ['NZBPP_CATEGORY'] = ''
-	
+
 	# pp-parameters of nzb-file, including DNZB-headers
 	os.environ['NZBPR__DNZB_USENZBNAME'] = 'no'
-	#os.environ['NZBPR__DNZB_PROPERNAME='] = None
-	#os.environ['NZBPR__DNZB_EPISODENAME='] = None
+	os.environ['NZBPR__DNZB_PROPERNAME'] = ''
+	os.environ['NZBPR__DNZB_EPISODENAME'] = ''
 
 def run_test(testobj):
 	set_defaults()

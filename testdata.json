@@ -1,0 +1,153 @@
+[
+  {
+    "id": "up-ext-1",
+    "INPUTFILE": "71.2014.720p.Web-Dl.x264.Aac-IFT.MKV",
+    "OUTPUTFILE": "/movies/71 (2014).MKV",
+    "NZBPO_MOVIESFORMAT": "%t (%y).%ext"
+  },
+  {
+    "id": "lead-num-2",
+    "INPUTFILE": "71.2014.720p.Web-Dl.x264.Aac-IFT.mkv",
+    "OUTPUTFILE": "/movies/71 (2014).mkv",
+    "NZBPO_MOVIESFORMAT": "%t (%y).%ext"
+  },
+  {
+    "id": "lead-num-3",
+    "INPUTFILE": "22 Jump Street 2014 1080p BluRay x264 YIFY.mkv",
+    "OUTPUTFILE": "/movies/22 Jump Street (2014).mkv",
+    "NZBPO_MOVIESFORMAT": "%t (%y).%ext"
+  },
+  {
+    "id": "lead-num-4",
+    "INPUTFILE": "2001 A Space Odyssey (1968).mkv",
+    "OUTPUTFILE": "/movies/2001 a Space Odyssey (1968)/2001 a Space Odyssey (1968).mkv",
+    "NZBPO_MOVIESFORMAT": "%title (%y)/%title (%y).%ext"
+  },
+  {
+    "id": "up-1",
+    "INPUTFILE": "Cartoon.2014.720p.Web-Dl.x264.Aac-IFT.mkv",
+    "OUTPUTFILE": "/Cartoon (2014).mkv",
+    "NZBPO_MOVIESFORMAT": "%up/%t (%y).%ext",
+    "NZBPO_MOVIESDIR": "",
+    "NZBPP_CATEGORY": "Kids cartoons"
+  },
+  {
+    "id": "cat-2",
+    "INPUTFILE": "Cartoon.2014.720p.Web-Dl.x264.Aac-IFT.mkv",
+    "OUTPUTFILE": "/Kids.Cartoons/Cartoon (2014).mkv",
+    "NZBPO_MOVIESFORMAT": "%.cat/%t (%y).%ext",
+    "NZBPO_MOVIESDIR": "",
+    "NZBPP_CATEGORY": "Kids cartoons"
+  },
+  {
+    "id": "mini-1",
+    "INPUTFILE": "Band.of.Brothers.E10.Points.720p.BRRip.mkv",
+    "OUTPUTFILE": "/series/Mkv/Band of Brothers/Season 1/Band_of_Brothers - S01E10 - Points - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "mini-2",
+    "INPUTFILE": "Band.of.Brothers.EP10.Points.720p.BRRip.mkv",
+    "OUTPUTFILE": "/series/Mkv/Band of Brothers/Season 1/Band_of_Brothers - S01E10 - Points - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "mini-3",
+    "INPUTFILE": "The.Pacific.2010.EP09.BluRay.720p.DTS.x264-CHD.mkv",
+    "OUTPUTFILE": "/series/Mkv/The Pacific 2010/Season 1/The_Pacific_2010 - S01E09 - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "mini-4",
+    "INPUTFILE": "Ascension.Part.3.HDTV.x264-SYS.mkv",
+    "OUTPUTFILE": "/series/Mkv/Ascension/Season 1/Ascension - S01E03.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e.%ext"
+  },
+  {
+    "id": "mini-5",
+    "INPUTFILE": "The.Pacific.Pt.II.720p.HDTV.x264-IMMERSE.mkv",
+    "OUTPUTFILE": "/series/Mkv/The Pacific/Season 1/The_Pacific - S01E02.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e.%ext"
+  },
+  {
+    "id": "series-1",
+    "INPUTFILE": "The.Walking.Dead.2010.S01E04.BluRay.1080p.DD5.1.x264-CHD/fdlasdflkjghfklgsdfl.mkv",
+    "OUTPUTFILE": "/series/Mkv/The Walking Dead 2010/Season 1/The_Walking_Dead_2010 - S01E04 - 1080p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "series-2",
+    "INPUTFILE": "Doctor Who 2005 S00E09 Christmas Special 720p BluRay x264-SHORTBREHD.mkv",
+    "OUTPUTFILE": "/series/Mkv/Doctor Who 2005 2005/Season 0/Doctor_Who_2005 - S00E09 - Christmas Special - 720p.BluRay.mkv",
+    "NZBPO_SERIESYEAR": "yes",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "series-3",
+    "INPUTFILE": "Doctor Who 2005 S00E09 Christmas Special 2008 720p BluRay x264-SHORTBREHD.mkv",
+    "OUTPUTFILE": "/series/Mkv/Doctor Who 2008/Season 0/Doctor_Who - S00E09 - Christmas Special - 720p.BluRay.mkv",
+    "NZBPO_SERIESYEAR": "no",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "series-4",
+    "INPUTFILE": "Castle.S01E02.720p.BluRay.x264-SiNNERS.mkv",
+    "OUTPUTFILE": "/series/Mkv/Castle/Season 1/Castle - S01E02 - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "series-5",
+    "INPUTFILE": "Doctor Who 2005 S00E09 Christmas Special 2008 720p BluRay x264-SHORTBREHD.mkv",
+    "OUTPUTFILE": "/series/Mkv/Doctor Who 2005 2008/Season 0/Doctor_Who_2005 - S00E09 - Christmas Special - 720p.BluRay.mkv",
+    "NZBPO_SERIESYEAR": "yes",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "series-6",
+    "INPUTFILE": "Orphan.Black.S05E04.720p.HDTV.x264-AVS.mkv",
+    "OUTPUTFILE": "/series/Orphan Black/Season 05/Orphan.Black.S05E04.Let.the.Children.the.Childbearers.Toil.mkv",
+    "NZBPO_SERIESYEAR": "yes",
+    "NZBPO_SERIESFORMAT": "%sn/Season %0s/%s.n.S%0sE%0e.%e.n",
+    "NZBPO_DNZBHEADERS": "yes",
+    "NZBPR__DNZB_PROPERNAME": "Orphan Black",
+    "NZBPR__DNZB_EPISODENAME": "Let the Children the Childbearers Toil"
+  },
+  {
+    "id": "dated-1",
+    "INPUTFILE": "The.Daily.Show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/2013-06/The Daily Show - 2013-6-27.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d - %desc.%ext"
+  },
+  {
+    "id": "dated-2",
+    "INPUTFILE": "Real.Time.with.Bill.Maher.2014.10.31.720p.HDTV.x264-BATV.mkv",
+    "OUTPUTFILE": "/dated/2014-10/Real Time With Bill Maher - 2014-10-31.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d - %desc.%ext"
+  },
+  {
+    "id": "multi-1",
+    "INPUTFILE": "Castle.S01E02E03.720p.BluRay.x264-SiNNERS.mkv",
+    "OUTPUTFILE": "/series/Mkv/Castle/Season 1/Castle - S01E02-03 - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "multi-2",
+    "INPUTFILE": "Castle.S01E02E03E04.720p.BluRay.x264-SiNNERS.mkv",
+    "OUTPUTFILE": "/series/Mkv/Castle/Season 1/Castle - S01E02-03-04 - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext"
+  },
+  {
+    "id": "multi-3",
+    "INPUTFILE": "Castle.S01E02E03E04.720p.BluRay.x264-SiNNERS.mkv",
+    "OUTPUTFILE": "/series/Mkv/Castle/Season 1/Castle - S01E02-E04 - 720p.BluRay.mkv",
+    "NZBPO_SERIESFORMAT": "%Ext/%sn %y/Season %s/- %s_n - S%0sE%0e - %en - %qss.%qf.%ext",
+    "NZBPO_MULTIPLEEPISODES": "range",
+    "NZBPO_EPISODESEPARATOR": "-E"
+  },
+  {
+    "id": "group-20-40",
+    "INPUTFILE": "Fargo.1996.REMASTERED.BluRay.720p.H264-20-40.mp4",
+    "OUTPUTFILE": "/movies/Fargo (1996).mp4",
+    "NZBPO_MOVIESFORMAT": "%t (%y).%ext"
+  }
+]

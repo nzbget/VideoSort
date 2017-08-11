@@ -338,7 +338,7 @@ dnzb_proper_name=os.environ.get('NZBPR__DNZB_PROPERNAME', '')
 dnzb_episode_name=os.environ.get('NZBPR__DNZB_EPISODENAME', '')
 dnzb_movie_year=os.environ.get('NZBPR__DNZB_MOVIEYEAR', '')
 dnzb_more_info=os.environ.get('NZBPR__DNZB_MOREINFO', '')
-prefer_nzb_name=os.environ.get('NZBPO_PREFERNZBNAME', '')
+prefer_nzb_name=os.environ.get('NZBPO_PREFERNZBNAME', '') == 'yes'
 use_nzb_name=False
 
 # NZBPO_DNZBHEADERS must also be enabled

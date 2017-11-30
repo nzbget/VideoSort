@@ -676,7 +676,7 @@ def strip_folders(path):
     f = path.strip('/').split('/')
 
     # For path beginning with a slash, insert empty element to prevent loss
-    if path.strip()[0] in '/\\':
+    if len(path.strip()) > 0 and path.strip()[0] in '/\\':
         f.insert(0, '')
 
     def strip_all(x):

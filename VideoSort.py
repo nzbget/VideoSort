@@ -238,6 +238,26 @@
 # unique suffixes are added at the end of file names, e.g. My.Show.(2).mkv.
 #Overwrite=no
 
+# Change/Set permissions of new directories (yes, no).
+#
+# If enabled the new directories will have below permissions
+#isDirPerms=no
+
+# Permission for directories.
+#
+# Will be applied to new directories if enabled.
+#DirPerms=0770
+
+# Change/Set permissions of new files (yes, no).
+#
+# If enabled the new files will have below permissions
+#isFilePerms=no
+
+# Permission for files.
+#
+# Will be applied to new files if enabled.
+#FilePerms=0660
+
 # Delete download directory after renaming (yes, no).
 #
 # If after successful sorting all remaining files in the download directory
@@ -340,6 +360,10 @@ dnzb_movie_year=os.environ.get('NZBPR__DNZB_MOVIEYEAR', '')
 dnzb_more_info=os.environ.get('NZBPR__DNZB_MOREINFO', '')
 prefer_nzb_name=os.environ.get('NZBPO_PREFERNZBNAME', '') == 'yes'
 use_nzb_name=False
+is_dir_perms=os.environ['NZBPO_ISDIRPERMS'] == 'yes'
+dir_perms=os.environ['NZBPO_DIRPERMS']
+is_file_perms=os.environ['NZBPO_ISFILEPERMS'] == 'yes'
+file_perms=os.environ['NZBPO_FILEPERMS']
 
 # NZBPO_DNZBHEADERS must also be enabled
 deep_scan = dnzb_headers
@@ -397,9 +421,15 @@ def unique_name(new):
 def optimized_move(old, new):
     try:
         os.rename(old, new)
+        if is_file_perms:
+            os.chmod(new,int(file_perms,8))
+            print('[INFO] Permission: %s applied to new file: %s' % (file_perms,new))
     except OSError as ex:
         print('[DETAIL] Rename failed ({}), performing copy: {}'.format(ex, new))
         shutil.copyfile(old, new)
+        if is_file_perms:
+            os.chmod(new,int(file_perms,8))
+            print('[INFO] Permission: %s applied to new file: %s' % (file_perms,new))
         os.remove(old)
 
 def rename(old, new):
@@ -415,10 +445,16 @@ def rename(old, new):
             # rename to filename.(2).ext, filename.(3).ext, etc.
             new = unique_name(new)
             rename(old, new)
+            if is_file_perms:
+                os.chmod(new,int(file_perms,8))
+                print('[INFO] Permission: %s applied to new file: %s' % (file_perms,new))
     else:
         if not preview:
             if not os.path.exists(os.path.dirname(new)):
                 os.makedirs(os.path.dirname(new))
+                if is_dir_perms:
+                    os.chmod(os.path.dirname(new),int(dir_perms,8))
+                    print('[INFO] Permission: %s applied to new directory: %s' % (dir_perms,os.path.dirname(new)))
             optimized_move(old, new)
         print('[INFO] Moved: %s' % new)
     moved_src_files.append(old)

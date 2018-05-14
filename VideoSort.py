@@ -1183,7 +1183,7 @@ def construct_path(filename):
     if verbose:
         print('path after cleanup: %s' % path)
 
-    new_path = os.path.join(dest_dir, path)
+    new_path = os.path.join(str(dest_dir), str(path))
 
     if verbose:
         print('destination path: %s' % new_path)

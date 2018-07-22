@@ -482,7 +482,7 @@ def deep_scan_nfo(filename, ratio=deep_scan_ratio):
         # Convert file content into iterable words
         for word in ''.join([item for item in nfo.readlines()]).split():
             try:
-                guess = guessit.guess_file_info(word + '.nfo', info=['filename'])
+                guess = guessit.guessit(word + '.nfo')
                 # Series = TV, Title = Movie
                 if any(item in guess for item in ('title')):
                     # Compare word against NZB name

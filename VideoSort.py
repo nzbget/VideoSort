@@ -445,15 +445,15 @@ def move_satellites(videofile, dest):
                 # Handle subtitles and nfo files
                 subpart = ''
                 # We support GuessIt supported subtitle extensions
-                if fextlo[1:] in guessit.patterns.extension.subtitle_exts:
-                    guess = guessit.guess_file_info(filename, info=['filename'])
-                    if guess and 'subtitleLanguage' in guess:
+                if fextlo[1:] in ['srt', 'idx', 'sub', 'ssa', 'ass']:
+                    guess = guessit.guessit(filename)
+                    if guess and 'subtitle_language' in guess:
                         fbase = fbase[:fbase.rfind('.')]
                         # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
-                        subpart = '.' + guess['subtitleLanguage'][0].alpha2
+                        subpart = '.' + guess['subtitle_language'][0].alpha2
                     if verbose:
                         if subpart != '':
-                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitleLanguage'][0]))
+                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitle_language'][0]))
                         else:
                             # English (or undetermined)
                             print('Satellite: %s is a subtitle' % filename)
@@ -482,7 +482,7 @@ def deep_scan_nfo(filename, ratio=deep_scan_ratio):
         # Convert file content into iterable words
         for word in ''.join([item for item in nfo.readlines()]).split():
             try:
-                guess = guessit.guess_file_info(word + '.nfo', info=['filename'])
+                guess = guessit.guessit(word + '.nfo')
                 # Series = TV, Title = Movie
                 if any(item in guess for item in ('title')):
                     # Compare word against NZB name

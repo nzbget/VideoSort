@@ -1188,7 +1188,7 @@ def construct_path(filename):
     if verbose:
         print('destination path: %s' % new_path)
 
-    if filename.upper() == new_path.upper():
+    if filename == new_path:
         if verbose:
             print('Destination path equals filename  - return None')
         return None

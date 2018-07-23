@@ -2,7 +2,7 @@
 #
 # VideoSort post-processing script for NZBGet.
 #
-# Copyright (C) 2013-2017 Andrey Prygunkov <hugbug@users.sourceforge.net>
+# Copyright (C) 2013-2018 Andrey Prygunkov <hugbug@users.sourceforge.net>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -36,7 +36,7 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 8.0-testing.
+# PP-Script Version: 8.0.
 #
 # NOTE: This script requires Python 2.x to be installed on your system.
 

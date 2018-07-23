@@ -1,5 +1,21 @@
+videosort-8.0:
+  - updated guessit library from v1 to v2; this improves analysis in many cases;
+  - many code changes in VideoSort to adopt to new API of fully rewritten
+    guessit library;
+  - alternative formatting specifiers for %dn and %fn: %^dn, %.dn, %_dn,
+    %^dN, %.dN, %_dN, %^fn, %.fn, %_fn, %^fN, %.fN, %_fN;
+  - moving subtitles which are in sub-folders;
+  - skip rename if media file is already named correctly;
+  - better support of mounts to SAMBA shares or NTFS partitions;
+  - changed search path order for python modules to avoid possible conflicts
+    with other versions of installed libraries;
+  - created test suite;
+  - definable formatting of first and last episode on a multi-episode file;
+  - fixed: spaces entered in option "VideoExtensions" were not ignored.
+
 videosort-6.1:
-  - updated library babelfish used by guessit; this fixes a rare error regarding unicode characters.
+  - updated library babelfish used by guessit; this fixes a rare error regarding
+    unicode characters.
 
 videosort-6.0:
   - added support for "part"s; they are now treated as episodes;
@@ -13,11 +29,15 @@ videosort-6.0:
   - video extensions are now detected regardless of letter case.
 
 videosort-5.0:
-  - improved matching of subtitles to releases (thanks Chris Hamilton for the patch);
-  - added nfo deep scan to improve matching of nfo files (thanks Chris Hamilton for the patch);
+  - improved matching of subtitles to releases (thanks Chris Hamilton for the
+    patch);
+  - added nfo deep scan to improve matching of nfo files (thanks Chris Hamilton
+    for the patch);
   - new option "PreferNZBName";
-  - fixed: script may crash on certain tv show names when option "SeriesYear" was active;
-  - updated guessit-library to the newest release - this includes support for the autodetection of nfo files.
+  - fixed: script may crash on certain tv show names when option "SeriesYear"
+    was active;
+  - updated guessit-library to the newest release - this includes support for
+    the autodetection of nfo files.
 
 videosort-4.0:
   - improved detection of obfuscated file and directory names;
@@ -25,7 +45,8 @@ videosort-4.0:
     "X-DNZB-MovieYear";
   - removed support for DNZB-Header "X-DNZB-UseNZBName";
   - new option "DNZBHeaders" to disable using of DNZB-Headers if necessary;
-  - new format specifier "%imdb" and "%cpimdb" (thanks Chris Hamilton for the patch);
+  - new format specifier "%imdb" and "%cpimdb" (thanks Chris Hamilton for the
+    patch);
   - removing invalid characters from generated file name;
   - updated guessit-library to the newest release - this fixes several issues.
 
@@ -38,15 +59,18 @@ videosort-3.0:
     a nzb-name is used instead.
   
 videosort-2.0:
-  - new options "TvCategories", "OtherTvDir" and "OtherTvFormat" for TV shows, whose file names look like movies (neither series nor dated shows);
+  - new options "TvCategories", "OtherTvDir" and "OtherTvFormat" for TV shows,
+    whose file names look like movies (neither series nor dated shows);
   - new format specifier "{TEXT}" to make text lowercase;
   - new format specifiers "%y", "%decade", "%0decade" for seasoned TV shows;
   - added support for multi episode file names (example: My.Show.S01E02-03.mkv);
   - new option "EpisodeSeparator" to adjust formatting of multi episode file names;
   - added support for DNZB-Header "X-DNZB-UseNZBName";
   - added printing info-message when skipping small files;
-  - added using of command "[NZB] FINALDIR" to inform NZBGet about new files location; this path is then shown in the history dialog as "Destination";
-  - destination directories (options "MoviesDir", etc.) can be left empty to use global "DestDir" or "CategoryX.DestDir"  as destination;
+  - added using of command "[NZB] FINALDIR" to inform NZBGet about new files
+    location; this path is then shown in the history dialog as "Destination";
+  - destination directories (options "MoviesDir", etc.) can be left empty to use
+    global "DestDir" or "CategoryX.DestDir"  as destination;
   - updated guessit-library to the newest release - this fixes several issues.
 
 videosort-1.0:

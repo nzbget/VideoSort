@@ -131,6 +131,24 @@
     "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d - %desc.%ext"
   },
   {
+    "id": "dated-case-correct",
+    "INPUTFILE": "the.daily.show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/2013-06/The Daily Show - 2013-6-27.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%sn - %y-%m-%0d.%ext"
+  },
+  {
+    "id": "dated-case-correct-_",
+    "INPUTFILE": "Real.Time.With.Bill.Maher.2014.10.31.720p.HDTV.x264-BATV.mkv",
+    "OUTPUTFILE": "/dated/2014-10/Real_Time_With_Bill_Maher - 2014-10-31.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%s_n - %y-%m-%0d.%ext"
+  },
+  {
+    "id": "dated-case-preserve",
+    "INPUTFILE": "the.daily.show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/the daily show - 2013-6-27.mkv",
+    "NZBPO_DATEDFORMAT": "%sN - %y-%m-%0d.%ext"
+  },
+  {
     "id": "multi-1",
     "INPUTFILE": "Castle.S01E02E03.720p.BluRay.x264-SiNNERS.mkv",
     "OUTPUTFILE": "/series/Mkv/Castle/Season 1/Castle - S01E02-03 - 720p.BluRay.mkv",

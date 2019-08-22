@@ -901,11 +901,6 @@ def add_dated_mapping(guess, mapping):
     mapping.append(('%s.N', show_name_two))
     mapping.append(('%s_N', show_name_three))
 
-    # Guessit doesn't provide episode names for dated tv shows
-    mapping.append(('%desc', ''))
-    mapping.append(('%.desc', ''))
-    mapping.append(('%_desc', ''))
-
     # date
     date = guess.get('date')
 

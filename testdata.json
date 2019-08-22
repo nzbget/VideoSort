@@ -122,13 +122,13 @@
     "id": "dated-1",
     "INPUTFILE": "The.Daily.Show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
     "OUTPUTFILE": "/dated/2013-06/The Daily Show - 2013-6-27.mkv",
-    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d - %desc.%ext"
+    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d.%ext"
   },
   {
     "id": "dated-2",
     "INPUTFILE": "Real.Time.with.Bill.Maher.2014.10.31.720p.HDTV.x264-BATV.mkv",
     "OUTPUTFILE": "/dated/2014-10/Real Time With Bill Maher - 2014-10-31.mkv",
-    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d - %desc.%ext"
+    "NZBPO_DATEDFORMAT": "%y-%0m/%t - %y-%m-%0d.%ext"
   },
   {
     "id": "dated-case-correct",

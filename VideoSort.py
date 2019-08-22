@@ -362,6 +362,24 @@ moved_dst_files = []
 # for duplicate files such as "My Movie (2).mkv"
 dupe_separator = ' '
 
+
+class deprecation_support:
+    """Class implementing iterator for deprecation message support"""
+
+    def __init__(self, mapping):
+        self.iter = iter(mapping)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        map_entry = next(self.iter)
+        return map_entry if len(map_entry) >= 3 else list(map_entry) + [None]
+
+    def next(self):
+        return self.__next__()
+
+
 def guess_dupe_separator(format):
     """ Find out a char most suitable as dupe_separator
     """
@@ -573,10 +591,12 @@ def path_subst(path, mapping):
     while n < plen:
         result = path[n]
         if result == '%':
-            for key, value in mapping:
+            for key, value, msg in deprecation_support(mapping):
                 if path.startswith(key, n):
                     n += len(key)-1
                     result = value
+                    if msg:
+                        print('[WARNING] specifier %s is deprecated, %s' % (key, msg))
                     break
         newpath.append(result)
         n += 1

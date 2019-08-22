@@ -906,9 +906,9 @@ def add_dated_mapping(guess, mapping):
     mapping.append(('%_title', title_three))
 
     # title (short forms)
-    mapping.append(('%t', title))
-    mapping.append(('%.t', title_two))
-    mapping.append(('%_t', title_three))
+    mapping.append(('%t', title, 'consider using %sn'))
+    mapping.append(('%.t', title_two, 'consider using %s.n'))
+    mapping.append(('%_t', title_three, 'consider using %s_n'))
 
     # Show name
     series = guess.get('title', '')

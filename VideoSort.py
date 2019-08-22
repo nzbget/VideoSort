@@ -555,6 +555,21 @@ def path_subst(path, mapping):
     newpath = []
     plen = len(path)
     n = 0
+
+    # Sort list of mapping tuples by their first elements. First ascending by element,
+    # then descending by element length.
+    # Preparation to replace elements from longest to shortest in alphabetical order.
+    #
+    # >>> m = [('bb', 4), ('aa', 3), ('b', 6), ('aaa', 2), ('zzzz', 1), ('a', 5)]
+    # >>> m.sort(key=lambda t: t[0])
+    # >>> m
+    # [('a', 5), ('aa', 3), ('aaa', 2), ('b', 6), ('bb', 4), ('zzzz', 1)]
+    # >>> m.sort(key=lambda t: len(t[0]), reverse=True)
+    # >>> m
+    # [('zzzz', 1), ('aaa', 2), ('aa', 3), ('bb', 4), ('a', 5), ('b', 6)]
+    mapping.sort(key=lambda t: t[0])
+    mapping.sort(key=lambda t: len(t[0]), reverse=True)
+
     while n < plen:
         result = path[n]
         if result == '%':
@@ -843,13 +858,9 @@ def add_movies_mapping(guess, mapping):
     mapping.append(('%.t', title_two))
     mapping.append(('%_t', title_three))
 
-    mapping.append(('%sn', title))
-    mapping.append(('%s.n', title_two))
-    mapping.append(('%s_n', title_three))
-
-    mapping.append(('%sN', ttitle))
-    mapping.append(('%s.N', ttitle_two))
-    mapping.append(('%s_N', ttitle_three))
+    mapping.append(('%tT', ttitle))
+    mapping.append(('%t.T', ttitle_two))
+    mapping.append(('%t_T', ttitle_three))
 
     # year
     year = str(guess.get('year', ''))

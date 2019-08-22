@@ -40,6 +40,12 @@
     "NZBPP_CATEGORY": "Kids cartoons"
   },
   {
+    "id": "movies-1",
+    "INPUTFILE": " The.Silence.Of.The.Lambs.1991.1080p.BluRay.CUSTOM.Plus.Criterion.Comm.DTS.x264-MaG.mkv",
+    "OUTPUTFILE": "/movies/The_Silence_of_the_Lambs 1991.mkv",
+    "NZBPO_MOVIESFORMAT": "%t_T %y.%ext"
+  },
+  {
     "id": "mini-1",
     "INPUTFILE": "Band.of.Brothers.E10.Points.720p.BRRip.mkv",
     "OUTPUTFILE": "/series/Mkv/Band of Brothers/Season 1/Band_of_Brothers - S01E10 - Points - 720p.BluRay.mkv",

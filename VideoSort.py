@@ -868,19 +868,19 @@ def add_movies_mapping(guess, mapping):
     # title
     name = guess.get('title', '')
     ttitle, ttitle_two, ttitle_three = get_titles(name, True)
-    title, title_two, title_three = get_titles(name, True)
-    mapping.append(('%title', title))
-    mapping.append(('%.title', title_two))
-    mapping.append(('%_title', title_three))
+    title, title_two, title_three = get_titles(name, False)
+    mapping.append(('%title', ttitle))
+    mapping.append(('%.title', ttitle_two))
+    mapping.append(('%_title', ttitle_three))
 
     # title (short forms)
-    mapping.append(('%t', title))
-    mapping.append(('%.t', title_two))
-    mapping.append(('%_t', title_three))
+    mapping.append(('%t', ttitle))
+    mapping.append(('%.t', ttitle_two))
+    mapping.append(('%_t', ttitle_three))
 
-    mapping.append(('%tT', ttitle))
-    mapping.append(('%t.T', ttitle_two))
-    mapping.append(('%t_T', ttitle_three))
+    mapping.append(('%tT', title))
+    mapping.append(('%t.T', title_two))
+    mapping.append(('%t_T', title_three))
 
     # year
     year = str(guess.get('year', ''))

@@ -40,10 +40,22 @@
     "NZBPP_CATEGORY": "Kids cartoons"
   },
   {
-    "id": "movies-1",
-    "INPUTFILE": " The.Silence.Of.The.Lambs.1991.1080p.BluRay.CUSTOM.Plus.Criterion.Comm.DTS.x264-MaG.mkv",
+    "id": "movies-title-case-correct",
+    "INPUTFILE": "the.silence.of.the.lambs.1991.1080p.bluray.custom.plus.criterion.comm.dts.x264-mag.mkv",
+    "OUTPUTFILE": "/movies/The Silence of the Lambs 1991.mkv",
+    "NZBPO_MOVIESFORMAT": "%t %y.%ext"
+  },
+  {
+    "id": "movies-title-case-correct-_",
+    "INPUTFILE": "the.silence.of.the.lambs.1991.1080p.bluray.custom.plus.criterion.comm.dts.x264-mag.mkv",
     "OUTPUTFILE": "/movies/The_Silence_of_the_Lambs 1991.mkv",
-    "NZBPO_MOVIESFORMAT": "%t_T %y.%ext"
+    "NZBPO_MOVIESFORMAT": "%_t %y.%ext"
+  },
+  {
+    "id": "movies-title-case-preserve",
+    "INPUTFILE": "the.silence.of.the.lambs.1991.1080p.bluray.custom.plus.criterion.comm.dts.x264-mag.mkv",
+    "OUTPUTFILE": "/movies/the silence of the lambs 1991.mkv",
+    "NZBPO_MOVIESFORMAT": "%tT %y.%ext"
   },
   {
     "id": "mini-1",

@@ -362,6 +362,24 @@ moved_dst_files = []
 # for duplicate files such as "My Movie (2).mkv"
 dupe_separator = ' '
 
+
+class deprecation_support:
+    """Class implementing iterator for deprecation message support"""
+
+    def __init__(self, mapping):
+        self.iter = iter(mapping)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        map_entry = next(self.iter)
+        return map_entry if len(map_entry) >= 3 else list(map_entry) + [None]
+
+    def next(self):
+        return self.__next__()
+
+
 def guess_dupe_separator(format):
     """ Find out a char most suitable as dupe_separator
     """
@@ -573,10 +591,12 @@ def path_subst(path, mapping):
     while n < plen:
         result = path[n]
         if result == '%':
-            for key, value in mapping:
+            for key, value, msg in deprecation_support(mapping):
                 if path.startswith(key, n):
                     n += len(key)-1
                     result = value
+                    if msg:
+                        print('[WARNING] specifier %s is deprecated, %s' % (key, msg))
                     break
         newpath.append(result)
         n += 1
@@ -848,19 +868,19 @@ def add_movies_mapping(guess, mapping):
     # title
     name = guess.get('title', '')
     ttitle, ttitle_two, ttitle_three = get_titles(name, True)
-    title, title_two, title_three = get_titles(name, True)
-    mapping.append(('%title', title))
-    mapping.append(('%.title', title_two))
-    mapping.append(('%_title', title_three))
+    title, title_two, title_three = get_titles(name, False)
+    mapping.append(('%title', ttitle))
+    mapping.append(('%.title', ttitle_two))
+    mapping.append(('%_title', ttitle_three))
 
     # title (short forms)
-    mapping.append(('%t', title))
-    mapping.append(('%.t', title_two))
-    mapping.append(('%_t', title_three))
+    mapping.append(('%t', ttitle))
+    mapping.append(('%.t', ttitle_two))
+    mapping.append(('%_t', ttitle_three))
 
-    mapping.append(('%tT', ttitle))
-    mapping.append(('%t.T', ttitle_two))
-    mapping.append(('%t_T', ttitle_three))
+    mapping.append(('%tT', title))
+    mapping.append(('%t.T', title_two))
+    mapping.append(('%t_T', title_three))
 
     # year
     year = str(guess.get('year', ''))
@@ -886,22 +906,20 @@ def add_dated_mapping(guess, mapping):
     mapping.append(('%_title', title_three))
 
     # title (short forms)
-    mapping.append(('%t', title))
-    mapping.append(('%.t', title_two))
-    mapping.append(('%_t', title_three))
+    mapping.append(('%t', title, 'consider using %sn'))
+    mapping.append(('%.t', title_two, 'consider using %s.n'))
+    mapping.append(('%_t', title_three, 'consider using %s_n'))
 
-    mapping.append(('%sn', title))
-    mapping.append(('%s.n', title_two))
-    mapping.append(('%s_n', title_three))
-
-    mapping.append(('%sN', ttitle))
-    mapping.append(('%s.N', ttitle_two))
-    mapping.append(('%s_N', ttitle_three))
-
-    # Guessit doesn't provide episode names for dated tv shows
-    mapping.append(('%desc', ''))
-    mapping.append(('%.desc', ''))
-    mapping.append(('%_desc', ''))
+    # Show name
+    series = guess.get('title', '')
+    show_tname, show_tname_two, show_tname_three = get_titles(series, True)
+    show_name, show_name_two, show_name_three = get_titles(series, False)
+    mapping.append(('%sn', show_tname))
+    mapping.append(('%s.n', show_tname_two))
+    mapping.append(('%s_n', show_tname_three))
+    mapping.append(('%sN', show_name))
+    mapping.append(('%s.N', show_name_two))
+    mapping.append(('%s_N', show_name_three))
 
     # date
     date = guess.get('date')

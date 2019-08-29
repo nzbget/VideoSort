@@ -188,6 +188,8 @@
 # %sn, %s.n, %s_n - show name with words separated with spaces, dots
 #                   or underscores (case-adjusted);
 # %sN, %s.N, %s_N - show name (original letter case);
+# %en, %e.n, %e_n - episode name (case-adjusted);
+# %eN, %e.N, %e_N - episode name (original letter case);
 # %y              - year;
 # %decade         - two-digits decade (90, 00, 10);
 # %0decade        - four-digits decade (1990, 2000, 2010).
@@ -197,7 +199,7 @@
 # %0d              - two-digits day (01-31).
 #
 # For a list of common specifiers see option <MoviesFormat>.
-#DatedFormat=%sn/%sn - %y-%0m-%0d
+#DatedFormat=%sn/%sn - %en - %y-%0m-%0d
 
 # Formatting rules for other TV shows.
 #
@@ -920,6 +922,28 @@ def add_dated_mapping(guess, mapping):
     mapping.append(('%sN', show_name))
     mapping.append(('%s.N', show_name_two))
     mapping.append(('%s_N', show_name_three))
+
+    # Some older code at this point stated:
+    # "Guessit doesn't provide episode names for dated tv shows"
+    # but was referring to the invalid field '%desc'
+    # In my researches I couldn't find such a case, but just to be sure
+    ep_title = guess.get('episode_title')
+    if ep_title:
+        ep_tname, ep_tname_two, ep_tname_three = get_titles(ep_title, True)
+        ep_name, ep_name_two, ep_name_three = get_titles(ep_title, False)
+        mapping.append(('%en', ep_tname))
+        mapping.append(('%e.n', ep_tname_two))
+        mapping.append(('%e_n', ep_tname_three))
+        mapping.append(('%eN', ep_name))
+        mapping.append(('%e.N', ep_name_two))
+        mapping.append(('%e_N', ep_name_three))
+    else:
+        mapping.append(('%en', ''))
+        mapping.append(('%e.n', ''))
+        mapping.append(('%e_n', ''))
+        mapping.append(('%eN', ''))
+        mapping.append(('%e.N', ''))
+        mapping.append(('%e_N', ''))
 
     # date
     date = guess.get('date')

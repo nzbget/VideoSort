@@ -144,21 +144,21 @@
   },
   {
     "id": "dated-case-correct",
-    "INPUTFILE": "the.daily.show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
-    "OUTPUTFILE": "/dated/2013-06/The Daily Show - 2013-6-27.mkv",
-    "NZBPO_DATEDFORMAT": "%y-%0m/%sn - %y-%m-%0d.%ext"
+    "INPUTFILE": "the.daily.show.2013.6.2.tom.goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/2013-06/The Daily Show - Tom Goldstein - 2013-6-02.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%sn - %en - %y-%m-%0d.%ext"
   },
   {
     "id": "dated-case-correct-_",
-    "INPUTFILE": "Real.Time.With.Bill.Maher.2014.10.31.720p.HDTV.x264-BATV.mkv",
-    "OUTPUTFILE": "/dated/2014-10/Real_Time_With_Bill_Maher - 2014-10-31.mkv",
-    "NZBPO_DATEDFORMAT": "%y-%0m/%s_n - %y-%m-%0d.%ext"
+    "INPUTFILE": "the.daily.show.2013.6.2.tom.goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/2013-06/The_Daily_Show - Tom_Goldstein - 2013-6-02.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%s_n - %e_n - %y-%m-%0d.%ext"
   },
   {
     "id": "dated-case-preserve",
-    "INPUTFILE": "the.daily.show.2013.06.27.Tom.Goldstein.HDTV.x264-FQM.mkv",
-    "OUTPUTFILE": "/dated/the daily show - 2013-6-27.mkv",
-    "NZBPO_DATEDFORMAT": "%sN - %y-%m-%0d.%ext"
+    "INPUTFILE": "the.daily.show.2013.6.2.tom.goldstein.HDTV.x264-FQM.mkv",
+    "OUTPUTFILE": "/dated/2013-06/the daily show - tom goldstein - 2013-6-02.mkv",
+    "NZBPO_DATEDFORMAT": "%y-%0m/%sN - %eN - %y-%m-%0d.%ext"
   },
   {
     "id": "multi-1",

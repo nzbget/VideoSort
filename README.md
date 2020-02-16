@@ -26,8 +26,9 @@ VideoSort can organize:
 ## Installation
 
  - Download the newest version from [releases page](https://github.com/nzbget/VideoSort/releases/latest).
- - Unpack into pp-scripts directory. Your pp-scripts directory now should have folder "videosort" with subfolder "lib" and file "VideoSort.py";
+ - Unpack into pp-scripts directory. Your pp-scripts directory now should have folder "videosort" with subfolder "lib" and file "VideoSort.py". The folder is called "scripts" in newer versions of NZBGet;
  - Open settings tab in NZBGet web-interface and define settings for VideoSort;
+ - In the settings tab, go to "EXTENSION SCRIPTS" and "Choose" VideoSort in the list of "Extensions" to run after a download. It won't be called otherwise.
  - Save changes and restart NZBGet.
 
 ## Formatting string

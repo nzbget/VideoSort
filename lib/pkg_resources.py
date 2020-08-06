@@ -14,7 +14,13 @@ method.
 """
 
 import sys, os, zipimport, time, re, imp, types
-from urlparse import urlparse, urlunparse
+#PY3: from urlparse import urlparse, urlunparse
+
+#PY3:
+try:
+    basestring
+except NameError:
+    basestring = str
 
 try:
     frozenset
@@ -48,7 +54,7 @@ else:
 # attribute is present to decide wether to reinstall the package
 _distribute = True
 
-def _bypass_ensure_directory(name, mode=0777):
+def _bypass_ensure_directory(name, mode=0o777):
     # Sandbox-bypassing version of ensure_directory()
     if not WRITE_SUPPORT:
         raise IOError('"os.mkdir" not supported on this platform.')
@@ -62,20 +68,20 @@ _state_vars = {}
 
 def _declare_state(vartype, **kw):
     g = globals()
-    for name, val in kw.iteritems():
+    for name, val in kw.items():
         g[name] = val
         _state_vars[name] = vartype
 
 def __getstate__():
     state = {}
     g = globals()
-    for k, v in _state_vars.iteritems():
+    for k, v in _state_vars.items():
         state[k] = g['_sget_'+v](g[k])
     return state
 
 def __setstate__(state):
     g = globals()
-    for k, v in state.iteritems():
+    for k, v in state.items():
         g['_sset_'+_state_vars[k]](k, g[k], v)
     return state
 
@@ -660,7 +666,7 @@ class WorkingSet(object):
                 try:
                     resolvees = shadow_set.resolve(req, env, installer)
 
-                except ResolutionError,v:
+                except ResolutionError as v:
                     error_info[dist] = v    # save error info
                     if fallback:
                         continue    # try the next older version of project
@@ -718,11 +724,11 @@ class WorkingSet(object):
         return (self.entries[:], self.entry_keys.copy(), self.by_key.copy(),
                 self.callbacks[:])
 
-    def __setstate__(self, (entries, keys, by_key, callbacks)):
-        self.entries = entries[:]
-        self.entry_keys = keys.copy()
-        self.by_key = by_key.copy()
-        self.callbacks = callbacks[:]
+    def __setstate__(self, o):
+        self.entries = o.entries[:]
+        self.entry_keys = o.keys.copy()
+        self.by_key = o.by_key.copy()
+        self.callbacks = o.callbacks[:]
 
 
 
@@ -1031,7 +1037,7 @@ variable to point to an accessible directory.
 
         if os.name == 'posix':
             # Make the resource executable
-            mode = ((os.stat(tempname).st_mode) | 0555) & 07777
+            mode = ((os.stat(tempname).st_mode) | 0o555) & 0o7777
             os.chmod(tempname, mode)
 
 
@@ -1249,7 +1255,7 @@ class NullProvider:
                 len(script_text), 0, script_text.split('\n'), script_filename
             )
             script_code = compile(script_text,script_filename,'exec')
-            exec script_code in namespace, namespace
+            #PY3: exec script_code in namespace, namespace
 
     def _has(self, path):
         raise NotImplementedError(
@@ -1331,8 +1337,9 @@ class DefaultProvider(EggProvider):
 
 register_loader_type(type(None), DefaultProvider)
 
-if importlib_bootstrap is not None:
-    register_loader_type(importlib_bootstrap.SourceFileLoader, DefaultProvider)
+#PY3:
+#if importlib_bootstrap is not None:
+#    register_loader_type(importlib_bootstrap.SourceFileLoader, DefaultProvider)
 
 
 class EmptyProvider(NullProvider):
@@ -1740,7 +1747,12 @@ def StringIO(*args, **kw):
     try:
         from cStringIO import StringIO
     except ImportError:
-        from StringIO import StringIO
+        try:
+            from StringIO import StringIO
+        except ImportError:
+            #PY3:
+            from io import BytesIO
+            return BytesIO(*args,**kw)
     return StringIO(*args,**kw)
 
 def find_nothing(importer, path_item, only=False):
@@ -1789,8 +1801,9 @@ def find_on_path(importer, path_item, only=False):
                         break
 register_finder(ImpWrapper,find_on_path)
 
-if importlib_bootstrap is not None:
-    register_finder(importlib_bootstrap.FileFinder, find_on_path)
+#PY3:
+#if importlib_bootstrap is not None:
+#    register_finder(importlib_bootstrap.FileFinder, find_on_path)
 
 _declare_state('dict', _namespace_handlers={})
 _declare_state('dict', _namespace_packages={})
@@ -1891,8 +1904,9 @@ def file_ns_handler(importer, path_item, packageName, module):
 register_namespace_handler(ImpWrapper,file_ns_handler)
 register_namespace_handler(zipimport.zipimporter,file_ns_handler)
 
-if importlib_bootstrap is not None:
-    register_namespace_handler(importlib_bootstrap.FileFinder, file_ns_handler)
+#PY3:
+#if importlib_bootstrap is not None:
+#    register_namespace_handler(importlib_bootstrap.FileFinder, file_ns_handler)
 
 
 def null_ns_handler(importer, path_item, packageName, module):
@@ -2302,7 +2316,7 @@ class Distribution(object):
     def __getattr__(self,attr):
         """Delegate all unrecognized public attributes to .metadata provider"""
         if attr.startswith('_'):
-            raise AttributeError,attr
+            raise AttributeError #PY3: raise AttributeError,attr
         return getattr(self._provider, attr)
 
     #@classmethod
@@ -2670,7 +2684,7 @@ class Requirement:
 
     def __contains__(self,item):
         if isinstance(item,Distribution):
-            if item.key <> self.key: return False
+            if item.key != self.key: return False
             if self.index: item = item.parsed_version  # only get if we need it
         elif isinstance(item,basestring):
             item = parse_version(item)

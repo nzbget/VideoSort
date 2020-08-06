@@ -2,7 +2,7 @@
 #
 # VideoSort post-processing script for NZBGet.
 #
-# Copyright (C) 2013-2018 Andrey Prygunkov <hugbug@users.sourceforge.net>
+# Copyright (C) 2013-2020 Andrey Prygunkov <hugbug@users.sourceforge.net>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as published by
@@ -36,9 +36,9 @@
 # Author: Andrey Prygunkov (nzbget@gmail.com).
 # Web-site: http://nzbget.net/VideoSort.
 # License: GPLv3 (http://www.gnu.org/licenses/gpl.html).
-# PP-Script Version: 8.0.
+# PP-Script Version: 9.0.
 #
-# NOTE: This script requires Python 2.x to be installed on your system.
+# NOTE: This script requires Python 2.x or 3.x to be installed on your system.
 
 ##############################################################################
 ### OPTIONS                                                                   ###
@@ -272,6 +272,11 @@ import re
 import shutil
 import guessit
 import difflib
+
+try:
+    unicode
+except NameError:
+    unicode = str
 
 # Exit codes used by NZBGet
 POSTPROCESS_SUCCESS=93
@@ -848,7 +853,7 @@ def add_series_mapping(guess, mapping):
             episode_num_just = episodes[0].rjust(2, '0') + episode_separator + episodes[-1].rjust(2, '0')
         else:   # if multiple_episodes == 'list':
             for episode_num in episodes:
-                ep_prefix = episode_separator if episode_num_all <> '' else ''
+                ep_prefix = episode_separator if episode_num_all != '' else ''
                 episode_num_all += ep_prefix + episode_num
                 episode_num_just += ep_prefix + episode_num.rjust(2,'0')
 
@@ -1215,7 +1220,7 @@ def construct_path(filename):
     old_path = ''
     while old_path != path:
         old_path = path
-        for key, name in REPLACE_AFTER.iteritems():
+        for key, name in REPLACE_AFTER.items():
             path = path.replace(key, name)
 
     path = path.replace('%up', '..')

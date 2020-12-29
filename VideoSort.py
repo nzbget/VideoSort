@@ -475,10 +475,10 @@ def move_satellites(videofile, dest):
                     if guess and 'subtitle_language' in guess:
                         fbase = fbase[:fbase.rfind('.')]
                         # Use alpha2 subtitle language from GuessIt (en, es, de, etc.)
-                        subpart = '.' + guess['subtitle_language'][0].alpha2
+                        subpart = '.' + guess['subtitle_language'].alpha2
                     if verbose:
                         if subpart != '':
-                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitle_language'][0]))
+                            print('Satellite: %s is a subtitle [%s]' % (filename, guess['subtitle_language']))
                         else:
                             # English (or undetermined)
                             print('Satellite: %s is a subtitle' % filename)
@@ -489,7 +489,7 @@ def move_satellites(videofile, dest):
                         if guess is not None:
                             # Guess details are not important, just that there was a match
                             fbase = base
-                if fbase.lower() == base.lower():
+                if fbase.lower() != base.lower():
                     old = fpath
                     new = destbasenm + subpart + fext
                     if verbose:

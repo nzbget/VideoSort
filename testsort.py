@@ -92,7 +92,7 @@ def run_test(testobj):
 	shutil.rmtree(test_dir, True)
 	os.mkdir(test_dir)
 	dir_name, file_name = os.path.split(input_file)
-	if dir_name <> '':
+	if dir_name != '':
 		os.mkdir(test_dir + '/' + dir_name)
 	full_file_name = test_dir + '/' + input_file
 	out_file = open(full_file_name, 'w')
@@ -112,13 +112,13 @@ def run_test(testobj):
 	dest = ''
 
 	if ret == 93:
-		for line in out.split('\n'):
-			if line.startswith('destination path: '):
-				line = line[len('destination path: '):]
-				if line.startswith(root_dir):
-					line = line[len(root_dir):]
-				dest = line.replace('\\', '/')
-		success = dest == output_file and output_file <> ''
+		for line in out.split(b'\n'):
+			if line.startswith(b'destination path: '):
+				line = line[len(b'destination path: '):]
+				if line.startswith(root_dir.encode()):
+					line = line[len(root_dir.encode()):]
+				dest = line.replace(b'\\', b'/').decode()
+		success = dest == output_file and output_file != ''
 
 	if success:
 		print('%s: SUCCESS' % testobj['id'])

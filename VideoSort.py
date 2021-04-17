@@ -607,7 +607,7 @@ def path_subst(path, mapping):
                     break
         newpath.append(result)
         n += 1
-    return ''.join(newpath)
+    return ''.join(map(lambda x: '.'.join(x) if isinstance(x, list) else str(x), newpath))
 
 def get_titles(name, titleing=False):
     '''

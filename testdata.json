@@ -185,5 +185,11 @@
     "INPUTFILE": "Fargo.1996.REMASTERED.BluRay.720p.H264-20-40.mp4",
     "OUTPUTFILE": "/movies/Fargo (1996).mp4",
     "NZBPO_MOVIESFORMAT": "%t (%y).%ext"
+  },
+  {
+    "id": "multi-cat",
+    "INPUTFILE": "Bohemian.Rhapsody.2018.REMUX.2160p.(10bit).BluRay.UHD.HDR.HEVC.TrueHD.DTS-HD.MA.7.1-LEGi0N.mkv",
+    "OUTPUTFILE": "/movies/Bohemian Rhapsody (2018) BluRay-4K h265 7.1 TrueHD.DTS.mkv",
+    "NZBPO_MOVIESFORMAT": "/movies/%t (%y) %qf-%qss %qvc %qah %qac.%ext"
   }
 ]

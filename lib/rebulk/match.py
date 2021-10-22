@@ -5,7 +5,12 @@ Classes and functions related to matches
 """
 import copy
 import itertools
-from collections import defaultdict, MutableSequence
+import collections
+try:
+  from collections import defaultdict
+  from collections.abc import MutableSequence
+except ImportError:
+  from collections import defaultdict, MutableSequence
 
 try:
     from collections import OrderedDict  # pylint:disable=ungrouped-imports

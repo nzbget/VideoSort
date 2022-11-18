@@ -3,7 +3,7 @@
 """
 Various utilities functions
 """
-from collections import MutableSet
+from collections.abc import MutableSet
 
 from types import GeneratorType
 

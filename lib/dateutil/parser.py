@@ -9,6 +9,11 @@ import datetime
 import string
 import time
 import collections
+try:
+  from collections.abc import Callable
+except ImportError:
+  from collections import Callable
+
 from io import StringIO
 
 from six import text_type, binary_type, integer_types
@@ -311,9 +316,9 @@ class parser(object):
         if res.weekday is not None and not res.day:
             ret = ret+relativedelta.relativedelta(weekday=res.weekday)
         if not ignoretz:
-            if (isinstance(tzinfos, collections.Callable) or
+            if (isinstance(tzinfos, Callable) or
                     tzinfos and res.tzname in tzinfos):
-                if isinstance(tzinfos, collections.Callable):
+                if isinstance(tzinfos, Callable):
                     tzdata = tzinfos(res.tzname, res.tzoffset)
                 else:
                     tzdata = tzinfos.get(res.tzname)

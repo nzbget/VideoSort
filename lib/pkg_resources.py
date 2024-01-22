@@ -13,7 +13,7 @@ The package resource API is designed to work with normal filesystem packages,
 method.
 """
 
-import sys, os, zipimport, time, re, imp, types
+import sys, os, zipimport, time, re, importlib, types
 #PY3: from urlparse import urlparse, urlunparse
 
 #PY3:
